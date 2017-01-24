@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Terminal=false
+Name=Puffle Puyo
+Icon=puffle
+Comment=Play Puffle Puyo
+Exec=puffle_puyo
+Categories=Game;
