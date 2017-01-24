@@ -3,7 +3,7 @@
 gamedatadir = $(pkgdatadir)/data
 
 bin_PROGRAMS = puffle_puyo
-puffle_puyo_SOURCES = puyo.cpp path.c path.h
+puffle_puyo_SOURCES = puyo.cpp path.c path.h engine.cpp library.cpp map.cpp map.h falling.cpp falling.h
 
 if MINGW32
 puffle_puyo_SOURCES += 

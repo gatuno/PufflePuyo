@@ -1,6 +1,33 @@
 gamedatadir = $(pkgdatadir)/data
 
-nobase_dist_gamedata_DATA = 
+nobase_dist_gamedata_DATA = images/azul_fall.png \
+	images/azul_idle_1.png \
+	images/azul_idle_2.png \
+	images/azul_idle_3.png \
+	images/azul_idle_4.png \
+	images/azul_idle_5.png \
+	images/azul_idle_6.png \
+	images/azul_put.png \
+	images/bubble.png \
+	images/pop_1.png \
+	images/pop_2.png \
+	images/put_1.png \
+	images/put_2.png \
+	images/put_3.png \
+	images/put_4.png \
+	images/put_5.png \
+	images/put_6.png \
+	images/put_7.png \
+	images/put_8.png \
+	images/put_9.png \
+	images/rojo_fall.png \
+	images/rojo_idle_1.png \
+	images/rojo_idle_2.png \
+	images/rojo_idle_3.png \
+	images/rojo_idle_4.png \
+	images/rojo_idle_5.png \
+	images/rojo_idle_6.png \
+	images/rojo_put.png
 
 # Instalar los archivos .desktop e iconos
 applicationsdir = $(datadir)/applications
