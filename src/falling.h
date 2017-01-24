@@ -53,6 +53,9 @@ class FallingPiece {
 		void move_right (void);
 		
 		void fall (void);
+		void get_xy (int *x1, int *y1, int *x2, int *y2);
+		bool has_falled (void);
+		void get_color (int *c1, int *c2);
 };
 
 

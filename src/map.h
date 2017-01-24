@@ -35,11 +35,22 @@ enum {
 	COLOR_4
 };
 
+enum {
+	MAP_ANIMATE_NONE = 0,
+	MAP_ANIMATE_FALLING
+};
+
 class Map {
 	private:
 		int map[12][6];
+		int falling_offsets[12][6];
 		
 		FallingPiece f_p;
+		
+		int pos_x, pos_y;
+		
+		int animating;
+		
 	public:
 		Map (void);
 		

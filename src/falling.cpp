@@ -50,7 +50,7 @@ void FallingPiece::reset (void) {
 
 void FallingPiece::start_drop (void) {
 	x = 3;
-	y = 2;
+	y = 0;
 	
 	offset_y = -36;
 }
@@ -59,6 +59,15 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	int g, h;
 	SDL_Rect rect;
 	int image;
+	
+	/* Draw a highlight for the falling piece */
+	rect.x = map_x + x * 38 - 4;
+	rect.y = map_y + y * 36 - 4;
+	rect.w = 38;
+	rect.h = 36;
+	Uint32 azul = SDL_MapRGB (screen->format, 174, 159, 200);
+	
+	SDL_FillRect (screen, &rect, azul);
 	
 	/* First piece */
 	rect.x = map_x + x * 38 - 8;
@@ -184,8 +193,55 @@ void FallingPiece::move_right (void) {
 void FallingPiece::fall (void) {
 	offset_y++;
 	
-	if (offset_y == 0) {
+	if (offset_y > 0) {
 		y++;
-		offset_y = -36;
+		offset_y = -35;
+	}
+}
+
+void FallingPiece::get_xy (int *x1, int *y1, int *x2, int *y2) {
+	int g, h;
+	
+	if (x1 != NULL) {
+		*x1 = x;
+	}
+	
+	if (y1 != NULL) {
+		*y1 = y;
+	}
+	
+	if (rotate == PIECE_UP) {
+		g = 0; h = -1;
+	} else if (rotate == PIECE_DOWN) {
+		g = 0; h = 1;
+	} else if (rotate == PIECE_LEFT) {
+		g = -1; h = 0;
+	} else if (rotate == PIECE_RIGHT) {
+		g = 1; h = 0;
+	}
+	
+	if (x2 != NULL) {
+		*x2 = x + g;
+	}
+	if (y2 != NULL) {
+		*y2 = y + h;
+	}
+}
+
+bool FallingPiece::has_falled (void) {
+	if (offset_y == 0) {
+		return true;
+	}
+	
+	return false;
+}
+
+void FallingPiece::get_color (int *c1, int *c2) {
+	if (c1 != NULL) {
+		*c1 = color_1;
+	}
+	
+	if (c2 != NULL) {
+		*c2 = color_2;
 	}
 }
