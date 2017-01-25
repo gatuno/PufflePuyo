@@ -135,24 +135,24 @@ void FallingPiece::rotate_clock (int map[12][6]) {
 	/* If the piece is in the right edge, move to the left */
 	if (x == 5) {
 		right_block = true;
-		printf ("Bloqueado a la derecha por borde\n");
+		//printf ("Bloqueado a la derecha por borde\n");
 	} else if (x == 0) {
 		left_block = true;
-		printf ("Bloqueado a la izquierda por borde\n");
+		//printf ("Bloqueado a la izquierda por borde\n");
 	}
 	if (rotate == PIECE_UP || rotate == PIECE_DOWN) {
 		if (x < 5 && map[y][x + 1] != COLOR_NONE) {
 			right_block = true;
-			printf ("Bloqueado a la derecha por pieza\n");
+			//printf ("Bloqueado a la derecha por pieza\n");
 		}
 		if (x > 0 && map[y][x - 1] != COLOR_NONE) {
 			left_block = true;
-			printf ("Bloqueado a la izquierda por pieza\n");
+			//printf ("Bloqueado a la izquierda por pieza\n");
 		}
 	}
 	
 	if (right_block && left_block) {
-		printf ("Bloqueado por ambos lados\n");
+		//printf ("Bloqueado por ambos lados\n");
 		/* We can't rotate left or right, so we flip vertically */
 		g = x;
 		h = y;
@@ -358,12 +358,9 @@ void FallingPiece::fall (void) {
 }
 
 void FallingPiece::get_xy (int *x1, int *y1, int *x2, int *y2) {
-	int g, h;
-	
 	if (x1 != NULL) {
 		*x1 = x;
 	}
-	
 	if (y1 != NULL) {
 		*y1 = y;
 	}

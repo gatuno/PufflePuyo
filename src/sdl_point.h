@@ -1,5 +1,5 @@
 /*
- * map.h
+ * sdl_point.h
  * This file is part of Puffle Puyo
  *
  * Copyright (C) 2017 - Félix Arreola Rodríguez
@@ -20,53 +20,12 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef __MAP_H__
-#define __MAP_H__
+#ifndef __SDL_POINT_H__
+#define __SDL_POINT_H__
 
-#include <SDL.h>
+typedef struct {
+	int x, y;
+} SDLPoint;
 
-#include "falling.h"
-
-enum {
-	COLOR_NONE = 0,
-	COLOR_1,
-	COLOR_2,
-	COLOR_3,
-	COLOR_4
-};
-
-enum {
-	MAP_ANIMATE_NONE = 0,
-	MAP_ANIMATE_FALLING
-};
-
-class Map {
-	private:
-		int map[12][6];
-		int falling_offsets[12][6];
-		
-		FallingPiece f_p;
-		
-		int pos_x, pos_y;
-		
-		int animating;
-	
-	/* Methods */
-		void check_islands (void);
-	public:
-		Map (void);
-		
-		void draw (SDL_Surface *);
-		void send_rotate_clock (void);
-		void send_rotate_counter (void);
-		void send_move_left (void);
-		void send_move_right (void);
-		
-		void animate (void);
-		
-		void send_down (void);
-		void send_stop_down (void);
-};
-
-#endif /* __MAP_H__ */
+#endif /* __SDL_POINT_H__ */
 

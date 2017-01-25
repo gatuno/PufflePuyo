@@ -42,6 +42,7 @@
 #include "engine.h"
 #include "map.h"
 #include "falling.h"
+#include "sdl_point.h"
 
 Map::Map (void) {
 	/* Clear map */
@@ -163,7 +164,9 @@ void Map::animate (void) {
 	int x1, x2, y1, y2;
 	int color_1, color_2;
 	int g, h;
+	bool new_piece;
 	
+	new_piece = false;
 	if (animating == MAP_ANIMATE_NONE) {
 		/* Check if the falling piece is at a boundary */
 		if (f_p.has_falled ()) {
@@ -176,9 +179,9 @@ void Map::animate (void) {
 				/* Put the Piece on the map */
 				map[y1][x1] = color_1;
 				map[y2][x2] = color_2;
-			
+				
+				new_piece = true;
 				f_p.reset ();
-				f_p.start_drop ();
 			} else if (map[y1 + 1][x1] != COLOR_NONE) {
 				/* Colission */
 				map[y1][x1] = color_1;
@@ -192,13 +195,12 @@ void Map::animate (void) {
 				}
 				
 				map[g][x2] = color_2;
+				new_piece = true;
 				
 				f_p.reset ();
 				if (g - y2 != 0) {
 					falling_offsets[g][x2] = (g - y2) * 36;
 					animating = MAP_ANIMATE_FALLING;
-				} else {
-					f_p.start_drop ();
 				}
 			} else if (map[y2 + 1][x2] != COLOR_NONE) {
 				/* Colission */
@@ -215,13 +217,11 @@ void Map::animate (void) {
 				}
 				
 				map[g][x1] = color_1;
-				
+				new_piece = true;
 				f_p.reset ();
 				if (g - y1 != 0) {
 					falling_offsets[g][x1] = (g - y1) * 36;
 					animating = MAP_ANIMATE_FALLING;
-				} else {
-					f_p.start_drop ();
 				}
 			} else {
 				f_p.fall ();
@@ -244,9 +244,89 @@ void Map::animate (void) {
 		
 		if (still == false) {
 			/* Send another piece */
-			f_p.start_drop ();
+			new_piece = true;
+			//f_p.start_drop ();
 			animating = MAP_ANIMATE_NONE;
 		}
 	}
 	
+	if (new_piece) {
+		/* Check for pieces that may be together */
+		check_islands ();
+		
+		/* If nothing has been erased, then send the next piece */
+		if (animating == MAP_ANIMATE_NONE) {
+			f_p.start_drop ();
+		}
+	}
+}
+
+void Map::check_islands (void) {
+	int visitados[12][6];
+	int x, y, g, h;
+	int i;
+	
+	/* Max island should never be more than 12, I hope */
+	SDLPoint next[12];
+	int color;
+	int size;
+	memset (visitados, 0, sizeof (visitados));
+	
+	for (y = 0; y < 12; y++) {
+		for (x = 0; x < 6; x++) {
+			if (visitados[y][x] == 1) continue;
+			
+			if (map[y][x] == COLOR_NONE) {
+				visitados[y][x] = 1;
+				continue;
+			}
+			
+			size = 1;
+			next[0].x = x;
+			next[0].y = y;
+			color = map[y][x];
+			visitados[y][x] = 1;
+			
+			i = 0;
+			while (i < size) {
+				g = next[i].x;
+				h = next[i].y;
+				
+				if (h > 0 && map[h - 1][g] == color && visitados[h - 1][g] == 0) {
+					/* Add to the next list */
+					next[size].x = g;
+					next[size].y = h - 1;
+					visitados[h - 1][g] = 1;
+					size++;
+				}
+				if (h < 11 && map[h + 1][g] == color && visitados[h + 1][g] == 0) {
+					next[size].x = g;
+					next[size].y = h + 1;
+					visitados[h + 1][g] = 1;
+					size++;
+				}
+				if (g > 0 && map[h][g - 1] == color && visitados[h][g - 1] == 0) {
+					next[size].x = g - 1;
+					next[size].y = h;
+					visitados[h][g - 1] = 1;
+					size++;
+				}
+				if (g < 5 && map[h][g + 1] == color && visitados[h][g + 1] == 0) {
+					next[size].x = g + 1;
+					next[size].y = h;
+					visitados[h][g + 1] = 1;
+					size++;
+				}
+				i++;
+			}
+			
+			if (size >= 4) {
+				/* We have a 4 group */
+				printf ("We have a group of four:\n");
+				for (i = 0; i < size; i++) {
+					printf ("Pos: %i, %i\n", next[i].x, next[i].y);
+				}
+			}
+		}
+	}
 }
