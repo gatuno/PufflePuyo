@@ -37,6 +37,9 @@ FallingPiece::FallingPiece (void) {
 void FallingPiece::reset (void) {
 	x = -1;
 	y = -1;
+	p_x = -1;
+	p_y = -1;
+	acel = false;
 	
 	color_1 = COLOR_1 + RANDOM (4);
 	color_2 = COLOR_1 + RANDOM (4);
@@ -51,6 +54,9 @@ void FallingPiece::reset (void) {
 void FallingPiece::start_drop (void) {
 	x = 3;
 	y = 0;
+	
+	p_x = 3;
+	p_y = -1;
 	
 	offset_y = -36;
 }
@@ -95,19 +101,9 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	
 	SDL_BlitSurface (library->images [Library::IMG_BUBBLE], NULL, screen, &rect);
 	
-	if (rotate == PIECE_UP) {
-		g = 0; h = -1;
-	} else if (rotate == PIECE_DOWN) {
-		g = 0; h = 1;
-	} else if (rotate == PIECE_LEFT) {
-		g = -1; h = 0;
-	} else if (rotate == PIECE_RIGHT) {
-		g = 1; h = 0;
-	}
-	
 	/* Draw the second piece */
-	rect.x = map_x + (x + g) * 38 - 8;
-	rect.y = map_y + (y + h) * 36 - 8;
+	rect.x = map_x + (p_x) * 38 - 8;
+	rect.y = map_y + (p_y) * 36 - 8;
 	rect.y += offset_y;
 	
 	if (color_2 == COLOR_1) {
@@ -122,8 +118,8 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_BlitSurface (library->images [image], NULL, screen, &rect);
 	
 	/* Draw the bubble */
-	rect.x = map_x + (x + g) * 38 - 8;
-	rect.y = map_y + (y + h) * 36 - 8;
+	rect.x = map_x + (p_x) * 38 - 8;
+	rect.y = map_y + (p_y) * 36 - 8;
 	rect.y += offset_y;
 	
 	rect.w = library->images [Library::IMG_BUBBLE]->w;
@@ -132,70 +128,232 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_BlitSurface (library->images [Library::IMG_BUBBLE], NULL, screen, &rect);
 }
 
-void FallingPiece::rotate_clock (void) {
+void FallingPiece::rotate_clock (int map[12][6]) {
+	int right_block = false, left_block = false;
+	int g, h;
+	
 	/* If the piece is in the right edge, move to the left */
-	if (x == 5 && rotate == PIECE_UP) {
-		x = 4;
-	} else if (x == 0 && rotate == PIECE_DOWN) {
-		x = 1;
+	if (x == 5) {
+		right_block = true;
+		printf ("Bloqueado a la derecha por borde\n");
+	} else if (x == 0) {
+		left_block = true;
+		printf ("Bloqueado a la izquierda por borde\n");
+	}
+	if (rotate == PIECE_UP || rotate == PIECE_DOWN) {
+		if (x < 5 && map[y][x + 1] != COLOR_NONE) {
+			right_block = true;
+			printf ("Bloqueado a la derecha por pieza\n");
+		}
+		if (x > 0 && map[y][x - 1] != COLOR_NONE) {
+			left_block = true;
+			printf ("Bloqueado a la izquierda por pieza\n");
+		}
+	}
+	
+	if (right_block && left_block) {
+		printf ("Bloqueado por ambos lados\n");
+		/* We can't rotate left or right, so we flip vertically */
+		g = x;
+		h = y;
+		x = p_x;
+		y = p_y;
+		p_x = g;
+		p_y = h;
+		
+		if (rotate == PIECE_DOWN) {
+			rotate = PIECE_UP;
+		} else {
+			rotate = PIECE_DOWN;
+		}
+		return;
+	}
+	
+	if (right_block && rotate == PIECE_UP) {
+		x--;
+	}
+	
+	if (left_block && rotate == PIECE_DOWN) {
+		x++;
+	}
+	
+	if (rotate == PIECE_RIGHT) {
+		/* As we are rotating down, check if we have collision with the piece below */
+		if (y + 1 > 11 || map[y + 1][x] != COLOR_NONE) {
+			rotate = PIECE_DOWN;
+			offset_y = 0;
+			y--;
+			p_x = x;
+			p_y = y + 1;
+			return;
+		}
 	}
 	
 	if (rotate == PIECE_UP) {
 		rotate = PIECE_RIGHT;
+		p_x = x + 1;
+		p_y = y;
 	} else if (rotate == PIECE_RIGHT) {
 		rotate = PIECE_DOWN;
+		p_x = x;
+		p_y = y + 1;
 	} else if (rotate == PIECE_DOWN) {
 		rotate = PIECE_LEFT;
+		p_x = x - 1;
+		p_y = y;
 	} else if (rotate == PIECE_LEFT) {
 		rotate = PIECE_UP;
+		p_x = x;
+		p_y = y - 1;
 	}
 }
 
-void FallingPiece::rotate_counter (void) {
+void FallingPiece::rotate_counter (int map[12][6]) {
+	int right_block = false, left_block = false;
+	int g, h;
+	
 	/* If the piece is in the right edge, move to the left */
-	if (x == 5 && rotate == PIECE_DOWN) {
-		x = 4;
-	} else if (x == 0 && rotate == PIECE_UP) {
-		x = 1;
+	if (x == 5) {
+		right_block = true;
+		//printf ("Bloqueado a la derecha por borde\n");
+	} else if (x == 0) {
+		left_block = true;
+		//printf ("Bloqueado a la izquierda por borde\n");
+	}
+	if (rotate == PIECE_UP || rotate == PIECE_DOWN) {
+		if (x < 5 && map[y][x + 1] != COLOR_NONE) {
+			right_block = true;
+			//printf ("Bloqueado a la derecha por pieza\n");
+		}
+		if (x > 0 && map[y][x - 1] != COLOR_NONE) {
+			left_block = true;
+			//printf ("Bloqueado a la izquierda por pieza\n");
+		}
+	}
+	
+	if (right_block && left_block) {
+		//printf ("Bloqueado por ambos lados\n");
+		/* We can't rotate left or right, so we flip vertically */
+		g = x;
+		h = y;
+		x = p_x;
+		y = p_y;
+		p_x = g;
+		p_y = h;
+		
+		if (rotate == PIECE_DOWN) {
+			rotate = PIECE_UP;
+		} else {
+			rotate = PIECE_DOWN;
+		}
+		return;
+	}
+	
+	if (left_block && rotate == PIECE_UP) {
+		x++;
+	}
+	
+	if (right_block && rotate == PIECE_DOWN) {
+		x--;
+	}
+	
+	if (rotate == PIECE_LEFT) {
+		/* As we are rotating down, check if we have collision with the piece below */
+		if (y + 1 > 11 || map[y + 1][x] != COLOR_NONE) {
+			rotate = PIECE_DOWN;
+			offset_y = 0;
+			y--;
+			p_x = x;
+			p_y = y + 1;
+			return;
+		}
 	}
 	
 	if (rotate == PIECE_UP) {
 		rotate = PIECE_LEFT;
+		p_x = x - 1;
+		p_y = y;
 	} else if (rotate == PIECE_LEFT) {
 		rotate = PIECE_DOWN;
+		p_x = x;
+		p_y = y + 1;
 	} else if (rotate == PIECE_DOWN) {
 		rotate = PIECE_RIGHT;
+		p_x = x + 1;
+		p_y = y;
 	} else if (rotate == PIECE_RIGHT) {
 		rotate = PIECE_UP;
+		p_x = x;
+		p_y = y - 1;
 	}
 }
 
-void FallingPiece::move_left (void) {
+void FallingPiece::move_left (int map[12][6]) {
+	if (x > 0) {
+		if (map[y][x - 1] != COLOR_NONE) {
+			return; /* Cant move to the left */
+		}
+	}
+	if (p_x > 0 && p_y > 0) {
+		if (map[p_y][p_x - 1] != COLOR_NONE) {
+			return; /* The other part of the falling piece can't move to the left */
+		}
+	}
+	
 	if (rotate == PIECE_LEFT) {
 		if (x > 1) {
 			x--;
+			p_x--;
 		}
 	} else if (x > 0) {
 		x--;
+		p_x--;
 	}
 }
 
-void FallingPiece::move_right (void) {
+void FallingPiece::move_right (int map[12][6]) {
+	if (x < 5) {
+		if (map[y][x + 1] != COLOR_NONE) {
+			return; /* Can't move to the right */
+		}
+	}
+	if (p_x < 5 && p_y > 0) {
+		if (map[p_y][p_x + 1] != COLOR_NONE) {
+			return;
+		}
+	}
 	if (rotate == PIECE_RIGHT) {
 		if (x < 4) {
 			x++;
+			p_x++;
 		}
 	} else if (x < 5) {
 		x++;
+		p_x++;
 	}
 }
 
 void FallingPiece::fall (void) {
-	offset_y++;
+	if (acel) {
+		if (offset_y % 4 != 0) {
+			//printf ("%i Mod 4: %i\n", offset_y, (offset_y % 4));
+			offset_y += (-1 * (offset_y % 4));
+			//printf ("%i after\n", offset_y);
+		} else {
+			offset_y += 4;
+		}
+	} else {
+		offset_y++;
+	}
 	
 	if (offset_y > 0) {
 		y++;
-		offset_y = -35;
+		p_y++;
+		if (acel) {
+			offset_y = -32;
+		} else {
+			offset_y = -35;
+		}
 	}
 }
 
@@ -210,21 +368,11 @@ void FallingPiece::get_xy (int *x1, int *y1, int *x2, int *y2) {
 		*y1 = y;
 	}
 	
-	if (rotate == PIECE_UP) {
-		g = 0; h = -1;
-	} else if (rotate == PIECE_DOWN) {
-		g = 0; h = 1;
-	} else if (rotate == PIECE_LEFT) {
-		g = -1; h = 0;
-	} else if (rotate == PIECE_RIGHT) {
-		g = 1; h = 0;
-	}
-	
 	if (x2 != NULL) {
-		*x2 = x + g;
+		*x2 = p_x;
 	}
 	if (y2 != NULL) {
-		*y2 = y + h;
+		*y2 = p_y;
 	}
 }
 
@@ -245,3 +393,12 @@ void FallingPiece::get_color (int *c1, int *c2) {
 		*c2 = color_2;
 	}
 }
+
+void FallingPiece::start_acel (void) {
+	acel = true;
+}
+
+void FallingPiece::stop_acel (void) {
+	acel = false;
+}
+

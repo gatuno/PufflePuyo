@@ -61,6 +61,9 @@ class Map {
 		void send_move_right (void);
 		
 		void animate (void);
+		
+		void send_down (void);
+		void send_stop_down (void);
 };
 
 #endif /* __MAP_H__ */

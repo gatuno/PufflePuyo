@@ -34,11 +34,12 @@ enum {
 
 class FallingPiece {
 	public:
-		int x, y;
+		int x, y; /* The main part of the piece */
+		int p_x, p_y; /* The other part of the piece */
 		int color_1, color_2;
 		int rotate;
 		int offset_y;
-	
+		bool acel;
 	/* Methods */
 		FallingPiece (void);
 		
@@ -47,15 +48,17 @@ class FallingPiece {
 		void draw (SDL_Surface *, int, int);
 		
 		/* To move the piece */
-		void rotate_clock (void);
-		void rotate_counter (void);
-		void move_left (void);
-		void move_right (void);
+		void rotate_clock (int map[12][6]);
+		void rotate_counter (int map[12][6]);
+		void move_left (int map[12][6]);
+		void move_right (int map[12][6]);
 		
 		void fall (void);
 		void get_xy (int *x1, int *y1, int *x2, int *y2);
 		bool has_falled (void);
 		void get_color (int *c1, int *c2);
+		void start_acel (void);
+		void stop_acel (void);
 };
 
 

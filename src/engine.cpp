@@ -143,6 +143,15 @@ int GameEngine::loop (void) {
 						p1.send_move_left ();
 					} else if (key == SDLK_RIGHT) {
 						p1.send_move_right ();
+					} else if (key == SDLK_DOWN) {
+						p1.send_down ();
+					}
+					break;
+				case SDL_KEYUP:
+					key = event.key.keysym.sym;
+					
+					if (key == SDLK_DOWN) {
+						p1.send_stop_down ();
 					}
 					break;
 			}

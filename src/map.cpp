@@ -126,24 +126,37 @@ void Map::draw (SDL_Surface *screen) {
 }
 
 void Map::send_rotate_clock (void) {
-	f_p.rotate_clock ();
+	f_p.rotate_clock (map);
 }
 
 void Map::send_rotate_counter (void) {
-	f_p.rotate_counter ();
+	f_p.rotate_counter (map);
 }
 
 void Map::send_move_left (void) {
-	int x1, x2, y1, y2;
 	if (animating == MAP_ANIMATE_NONE) {
-		/* Validate before sending the move */
-		f_p.get_xy (&x1, &y1, &x2, &y2);
-		f_p.move_left ();
+		/* Validation is made inside the falling piece */
+		f_p.move_left (map);
 	}
 }
 
 void Map::send_move_right (void) {
-	f_p.move_right ();
+	if (animating == MAP_ANIMATE_NONE) {
+		/* Validation is made inside the falling piece */
+		f_p.move_right (map);
+	}
+}
+
+void Map::send_down (void) {
+	if (animating == MAP_ANIMATE_NONE) {
+		f_p.start_acel ();
+	}
+}
+
+void Map::send_stop_down (void) {
+	if (animating == MAP_ANIMATE_NONE) {
+		f_p.stop_acel ();
+	}
 }
 
 void Map::animate (void) {
@@ -152,8 +165,6 @@ void Map::animate (void) {
 	int g, h;
 	
 	if (animating == MAP_ANIMATE_NONE) {
-		f_p.fall ();
-	
 		/* Check if the falling piece is at a boundary */
 		if (f_p.has_falled ()) {
 			/* Check now for collissions */
@@ -212,7 +223,11 @@ void Map::animate (void) {
 				} else {
 					f_p.start_drop ();
 				}
+			} else {
+				f_p.fall ();
 			}
+		} else {
+			f_p.fall ();
 		}
 	} else if (animating == MAP_ANIMATE_FALLING) {
 		/* Decrement offsets to make pieces fall slowy */
