@@ -40,6 +40,13 @@ enum {
 	MAP_ANIMATE_FALLING
 };
 
+/* To store all the bubbles falling */
+typedef struct {
+	float x, y;
+	float acel_x, acel_y;
+	int frame, color;
+} FalledPuffle;
+
 class Map {
 	private:
 		int map[15][6];
@@ -47,6 +54,9 @@ class Map {
 		int map_frames[15][6];
 		
 		FallingPiece f_p;
+		
+		FalledPuffle poped[30];
+		int poped_start, poped_end;
 		
 		int pos_x, pos_y;
 		

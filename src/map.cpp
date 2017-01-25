@@ -57,6 +57,10 @@ Map::Map (void) {
 	
 	f_p.start_drop ();
 	animating = MAP_ANIMATE_NONE;
+	
+	/* We use a circular list for the poped bubbles */
+	poped_start = 0;
+	poped_end = 0;
 }
 
 void Map::draw (SDL_Surface *screen) {
@@ -139,6 +143,32 @@ void Map::draw (SDL_Surface *screen) {
 	if (animating == MAP_ANIMATE_NONE) {
 		f_p.draw (screen, pos_x, pos_y);
 	}
+	
+	/* Draw the poped puffles */
+	if (poped_end != poped_start) {
+		for (g = poped_start; g != poped_end; g = (g + 1) % 30) {
+			if (poped[g].y > 660) continue;
+			rect.x = poped[g].x;
+			rect.y = poped[g].y;
+			
+			image = Library::IMG_PUFFLE_BLUE_FALL + 6 * (poped[g].color - COLOR_1);
+			
+			rect.w = library->images[image]->w;
+			rect.h = library->images[image]->h;
+			
+			SDL_BlitSurface (library->images[image], NULL, screen, &rect);
+			if (poped[g].frame == 0 || poped[g].frame == 1) {
+				rect.x = poped[g].x - 6;
+				rect.y = poped[g].y - 6;
+				
+				image = Library::IMG_BUBBLE_POP_1 + poped[g].frame;
+				rect.w = library->images[image]->w;
+				rect.h = library->images[image]->h;
+				
+				SDL_BlitSurface (library->images[image], NULL, screen, &rect);
+			}
+		}
+	}
 }
 
 void Map::send_rotate_clock (void) {
@@ -190,6 +220,28 @@ void Map::animate (void) {
 				if (map_frames[g][h] == 103) {
 					map_frames[g][h] = RANDOM(40);
 				}
+			}
+		}
+	}
+	
+	/* Animate the falling puffles */
+	if (poped_end != poped_start) {
+		for (g = poped_start; g != poped_end; g = (g + 1) % 30) {
+			poped[g].x += poped[g].acel_x;
+			poped[g].y += poped[g].acel_y;
+			
+			poped[g].acel_y += 1.0; /* Gravity */
+			if (poped[g].acel_x > 0.0) {
+				poped[g].acel_x -= 0.5;
+			} else if (poped[g].acel_x < 0.0) {
+				poped[g].acel_x += 0.5;
+			}
+			
+			poped[g].frame++;
+			
+			if (poped[g].y > 660.0 && g == poped_start) {
+				/* Delete this puffle */
+				poped_start = (poped_start + 1) % 30;
 			}
 		}
 	}
@@ -279,7 +331,7 @@ void Map::animate (void) {
 		}
 		
 		if (still == false) {
-			/* Send another piece */
+			/* Execute the island algorithm */
 			new_piece = true;
 			//f_p.start_drop ();
 			animating = MAP_ANIMATE_NONE;
@@ -366,6 +418,20 @@ void Map::check_islands (void) {
 					h = next[i].y;
 					/* Erase from the map */
 					map[h][g] = COLOR_NONE;
+					
+					/* Add these puffles to the list of falled */
+					/* If the list is full, erase the first one */
+					if (poped_start == (poped_end + 1) % 30) {
+						poped_start = (poped_start + 1) % 30;
+					}
+					poped[poped_end].x = pos_x + g * 38 - 8;
+					poped[poped_end].y = pos_y + (11 - h) * 36 - 8;
+					poped[poped_end].acel_y = RANDOM (4) * -1;
+					poped[poped_end].acel_x = (3 + RANDOM (7)) * (RANDOM(2) == 0 ? 1 : -1);
+					poped[poped_end].frame = 0;
+					poped[poped_end].color = color;
+					
+					poped_end = (poped_end + 1) % 30;
 				}
 			}
 		}
