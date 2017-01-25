@@ -48,10 +48,10 @@ class FallingPiece {
 		void draw (SDL_Surface *, int, int);
 		
 		/* To move the piece */
-		void rotate_clock (int map[12][6]);
-		void rotate_counter (int map[12][6]);
-		void move_left (int map[12][6]);
-		void move_right (int map[12][6]);
+		void rotate_clock (int map[15][6]);
+		void rotate_counter (int map[15][6]);
+		void move_left (int map[15][6]);
+		void move_right (int map[15][6]);
 		
 		void fall (void);
 		void get_xy (int *x1, int *y1, int *x2, int *y2);

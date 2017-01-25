@@ -57,8 +57,6 @@ static const char *images_names[Library::NUM_IMGS] = {
 	"images/azul_idle_2.png",
 	"images/azul_idle_3.png",
 	"images/azul_idle_4.png",
-	"images/azul_idle_5.png",
-	"images/azul_idle_6.png",
 	"images/azul_put.png",
 	"images/azul_fall.png",
 	
@@ -66,10 +64,22 @@ static const char *images_names[Library::NUM_IMGS] = {
 	"images/rojo_idle_2.png",
 	"images/rojo_idle_3.png",
 	"images/rojo_idle_4.png",
-	"images/rojo_idle_5.png",
-	"images/rojo_idle_6.png",
 	"images/rojo_put.png",
-	"images/rojo_fall.png"
+	"images/rojo_fall.png",
+	
+	"images/verde_idle_1.png",
+	"images/verde_idle_2.png",
+	"images/verde_idle_3.png",
+	"images/verde_idle_4.png",
+	"images/verde_put.png",
+	"images/verde_fall.png",
+	
+	"images/amarillo_idle_1.png",
+	"images/amarillo_idle_2.png",
+	"images/amarillo_idle_3.png",
+	"images/amarillo_idle_4.png",
+	"images/amarillo_put.png",
+	"images/amarillo_fall.png"
 };
 		
 int MediaLibrary::load (void) {

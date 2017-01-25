@@ -44,10 +44,13 @@
 #include "falling.h"
 #include "sdl_point.h"
 
+#define RANDOM(x) ((int) (x ## .0 * rand () / (RAND_MAX + 1.0)))
+
 Map::Map (void) {
 	/* Clear map */
 	memset (map, 0, sizeof (map));
 	memset (falling_offsets, 0, sizeof (falling_offsets));
+	memset (map_frames, 0, sizeof (map_frames));
 	
 	pos_x = 40;
 	pos_y = 80;
@@ -91,7 +94,7 @@ void Map::draw (SDL_Surface *screen) {
 			}
 			
 			rect.x = pos_x + h * 38 - 8;
-			rect.y = pos_y + g * 36 - 8;
+			rect.y = pos_y + (11 - g) * 36 - 8;
 			
 			if (falling_offsets[g][h] > 0) {
 				rect.y = rect.y - falling_offsets[g][h];
@@ -100,6 +103,18 @@ void Map::draw (SDL_Surface *screen) {
 				image = Library::IMG_PUFFLE_BLUE_IDLE_1;
 			} else if (map[g][h] == COLOR_2) {
 				image = Library::IMG_PUFFLE_RED_IDLE_1;
+			} else if (map[g][h] == COLOR_3) {
+				image = Library::IMG_PUFFLE_GREEN_IDLE_1;
+			} else if (map[g][h] == COLOR_4) {
+				image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
+			}
+			
+			if (map_frames[g][h] == 96 || map_frames[g][h] == 101) {
+				image += 1;
+			} else if (map_frames[g][h] == 97 || map_frames[g][h] == 102) {
+				image += 2;
+			} else if (map_frames[g][h] >= 98 && map_frames[g][h] <= 100) {
+				image += 3;
 			}
 			rect.w = library->images [image]->w;
 			rect.h = library->images [image]->h;
@@ -108,7 +123,7 @@ void Map::draw (SDL_Surface *screen) {
 			
 			/* Draw the bubble */
 			rect.x = pos_x + h * 38 - 8;
-			rect.y = pos_y + g * 36 - 8;
+			rect.y = pos_y + (11 - g) * 36 - 8;
 			if (falling_offsets[g][h] > 0) {
 				rect.y = rect.y - falling_offsets[g][h];
 			}
@@ -166,6 +181,18 @@ void Map::animate (void) {
 	int g, h;
 	bool new_piece;
 	
+	/* Animate all puffles in map */
+	for (g = 0; g < 12; g++) {
+		for (h = 0; h < 6; h++) {
+			if (map[g][h] != COLOR_NONE) {
+				map_frames[g][h]++;
+				
+				if (map_frames[g][h] == 103) {
+					map_frames[g][h] = RANDOM(40);
+				}
+			}
+		}
+	}
 	new_piece = false;
 	if (animating == MAP_ANIMATE_NONE) {
 		/* Check if the falling piece is at a boundary */
@@ -174,54 +201,63 @@ void Map::animate (void) {
 			f_p.get_xy (&x1, &y1, &x2, &y2);
 			f_p.get_color (&color_1, &color_2);
 		
-			if (y1 == 11 || y2 == 11) {
+			if (y1 == 0 || y2 == 0) {
 				/* Bottom, stop the piece */
 				/* Put the Piece on the map */
 				map[y1][x1] = color_1;
 				map[y2][x2] = color_2;
 				
+				map_frames[y1][x1] = RANDOM(40);
+				map_frames[y2][x2] = RANDOM(40);
+				
 				new_piece = true;
 				f_p.reset ();
-			} else if (map[y1 + 1][x1] != COLOR_NONE) {
+			} else if (map[y1 - 1][x1] != COLOR_NONE) {
 				/* Colission */
 				map[y1][x1] = color_1;
+				map_frames[y1][x1] = RANDOM(40);
 				
 				/* Check how much the other part will fall */
-				for (g = y2; g < 11; g++) {
-					if (map[g + 1][x2] != COLOR_NONE) {
+				for (g = y2; g > 0; g--) {
+					if (map[g - 1][x2] != COLOR_NONE) {
 						/* Stop here please */
 						break;
 					}
 				}
 				
 				map[g][x2] = color_2;
+				map_frames[y2][x2] = RANDOM(40);
 				new_piece = true;
 				
 				f_p.reset ();
-				if (g - y2 != 0) {
-					falling_offsets[g][x2] = (g - y2) * 36;
+				if (y2 - g != 0) {
+					falling_offsets[g][x2] = (y2 - g) * 36;
 					animating = MAP_ANIMATE_FALLING;
+					new_piece = false;
 				}
-			} else if (map[y2 + 1][x2] != COLOR_NONE) {
+			} else if (map[y2 - 1][x2] != COLOR_NONE) {
 				/* Colission */
 				f_p.get_color (&color_1, &color_2);
 				
 				map[y2][x2] = color_2;
+				map_frames[y2][x2] = RANDOM(40);
 				
 				/* Check how much the other part will fall */
-				for (g = y1; g < 11; g++) {
-					if (map[g + 1][x1] != COLOR_NONE) {
+				for (g = y1; g > 0; g--) {
+					if (map[g - 1][x1] != COLOR_NONE) {
 						/* Stop here please */
 						break;
 					}
 				}
 				
 				map[g][x1] = color_1;
+				map_frames[y1][x1] = RANDOM(40);
 				new_piece = true;
 				f_p.reset ();
-				if (g - y1 != 0) {
-					falling_offsets[g][x1] = (g - y1) * 36;
+				if (y1 - g != 0) {
+					falling_offsets[g][x1] = (y1 - g) * 36;
 					animating = MAP_ANIMATE_FALLING;
+					new_piece = false;
 				}
 			} else {
 				f_p.fall ();
@@ -262,7 +298,7 @@ void Map::animate (void) {
 }
 
 void Map::check_islands (void) {
-	int visitados[12][6];
+	int visitados[15][6];
 	int x, y, g, h;
 	int i;
 	
@@ -322,10 +358,38 @@ void Map::check_islands (void) {
 			
 			if (size >= 4) {
 				/* We have a 4 group */
-				printf ("We have a group of four:\n");
+				animating = MAP_ANIMATE_FALLING;
+				//printf ("We have a group of four:\n");
 				for (i = 0; i < size; i++) {
-					printf ("Pos: %i, %i\n", next[i].x, next[i].y);
+					//printf ("Pos: %i, %i\n", next[i].x, next[i].y);
+					g = next[i].x;
+					h = next[i].y;
+					/* Erase from the map */
+					map[h][g] = COLOR_NONE;
 				}
+			}
+		}
+	}
+	
+	/* Now, compress the map */
+	for (x = 0; x < 6; x++) {
+		for (y = 0; y < 12; y++) {
+			/* First, locate a empty spot */
+			if (map[y][x] == COLOR_NONE) {
+				g = x;
+				
+				for (i = y + 1; i < 13; i++) {
+					if (map[i][x] != COLOR_NONE) {
+						/* Move this piece */
+						map[y][x] = map[i][x];
+						map[i][x] = COLOR_NONE;
+						
+						falling_offsets[y][x] = (i - y) * 36;
+						break;
+					}
+				}
+				
+				if (i == 12) break; /* We don't have more pieces up this column */
 			}
 		}
 	}

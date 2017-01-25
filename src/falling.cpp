@@ -44,8 +44,8 @@ void FallingPiece::reset (void) {
 	color_1 = COLOR_1 + RANDOM (4);
 	color_2 = COLOR_1 + RANDOM (4);
 	
-	color_1 = COLOR_1;
-	color_2 = COLOR_2;
+	//color_1 = COLOR_1;
+	//color_2 = COLOR_2;
 	
 	rotate = PIECE_UP;
 	offset_y = 0;
@@ -53,10 +53,10 @@ void FallingPiece::reset (void) {
 
 void FallingPiece::start_drop (void) {
 	x = 3;
-	y = 0;
+	y = 11;
 	
 	p_x = 3;
-	p_y = -1;
+	p_y = 12;
 	
 	offset_y = -36;
 }
@@ -68,7 +68,7 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	
 	/* Draw a highlight for the falling piece */
 	rect.x = map_x + x * 38 - 4;
-	rect.y = map_y + y * 36 - 4;
+	rect.y = map_y + (11 - y) * 36 - 4;
 	rect.w = 38;
 	rect.h = 36;
 	Uint32 azul = SDL_MapRGB (screen->format, 174, 159, 200);
@@ -77,13 +77,17 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	
 	/* First piece */
 	rect.x = map_x + x * 38 - 8;
-	rect.y = map_y + y * 36 - 8;
+	rect.y = map_y + (11 - y) * 36 - 8;
 	rect.y += offset_y;
 	
 	if (color_1 == COLOR_1) {
 		image = Library::IMG_PUFFLE_BLUE_IDLE_1;
 	} else if (color_1 == COLOR_2) {
 		image = Library::IMG_PUFFLE_RED_IDLE_1;
+	} else if (color_1 == COLOR_3) {
+		image = Library::IMG_PUFFLE_GREEN_IDLE_1;
+	} else if (color_1 == COLOR_4) {
+		image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
 	}
 	
 	rect.w = library->images [image]->w;
@@ -93,7 +97,7 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	
 	/* Draw the bubble */
 	rect.x = map_x + x * 38 - 8;
-	rect.y = map_y + y * 36 - 8;
+	rect.y = map_y + (11 - y) * 36 - 8;
 	rect.y += offset_y;
 	
 	rect.w = library->images [Library::IMG_BUBBLE]->w;
@@ -102,14 +106,18 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_BlitSurface (library->images [Library::IMG_BUBBLE], NULL, screen, &rect);
 	
 	/* Draw the second piece */
-	rect.x = map_x + (p_x) * 38 - 8;
-	rect.y = map_y + (p_y) * 36 - 8;
+	rect.x = map_x + p_x * 38 - 8;
+	rect.y = map_y + (11 - p_y) * 36 - 8;
 	rect.y += offset_y;
 	
 	if (color_2 == COLOR_1) {
 		image = Library::IMG_PUFFLE_BLUE_IDLE_1;
 	} else if (color_2 == COLOR_2) {
 		image = Library::IMG_PUFFLE_RED_IDLE_1;
+	} else if (color_2 == COLOR_3) {
+		image = Library::IMG_PUFFLE_GREEN_IDLE_1;
+	} else if (color_2 == COLOR_4) {
+		image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
 	}
 	
 	rect.w = library->images [image]->w;
@@ -118,8 +126,8 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_BlitSurface (library->images [image], NULL, screen, &rect);
 	
 	/* Draw the bubble */
-	rect.x = map_x + (p_x) * 38 - 8;
-	rect.y = map_y + (p_y) * 36 - 8;
+	rect.x = map_x + p_x * 38 - 8;
+	rect.y = map_y + (11 - p_y) * 36 - 8;
 	rect.y += offset_y;
 	
 	rect.w = library->images [Library::IMG_BUBBLE]->w;
@@ -128,7 +136,7 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_BlitSurface (library->images [Library::IMG_BUBBLE], NULL, screen, &rect);
 }
 
-void FallingPiece::rotate_clock (int map[12][6]) {
+void FallingPiece::rotate_clock (int map[15][6]) {
 	int right_block = false, left_block = false;
 	int g, h;
 	
@@ -179,12 +187,12 @@ void FallingPiece::rotate_clock (int map[12][6]) {
 	
 	if (rotate == PIECE_RIGHT) {
 		/* As we are rotating down, check if we have collision with the piece below */
-		if (y + 1 > 11 || map[y + 1][x] != COLOR_NONE) {
+		if (y - 1 < 0 || map[y - 1][x] != COLOR_NONE) {
 			rotate = PIECE_DOWN;
 			offset_y = 0;
-			y--;
+			y++;
 			p_x = x;
-			p_y = y + 1;
+			p_y = y - 1;
 			return;
 		}
 	}
@@ -196,7 +204,7 @@ void FallingPiece::rotate_clock (int map[12][6]) {
 	} else if (rotate == PIECE_RIGHT) {
 		rotate = PIECE_DOWN;
 		p_x = x;
-		p_y = y + 1;
+		p_y = y - 1;
 	} else if (rotate == PIECE_DOWN) {
 		rotate = PIECE_LEFT;
 		p_x = x - 1;
@@ -204,11 +212,11 @@ void FallingPiece::rotate_clock (int map[12][6]) {
 	} else if (rotate == PIECE_LEFT) {
 		rotate = PIECE_UP;
 		p_x = x;
-		p_y = y - 1;
+		p_y = y + 1;
 	}
 }
 
-void FallingPiece::rotate_counter (int map[12][6]) {
+void FallingPiece::rotate_counter (int map[15][6]) {
 	int right_block = false, left_block = false;
 	int g, h;
 	
@@ -259,12 +267,12 @@ void FallingPiece::rotate_counter (int map[12][6]) {
 	
 	if (rotate == PIECE_LEFT) {
 		/* As we are rotating down, check if we have collision with the piece below */
-		if (y + 1 > 11 || map[y + 1][x] != COLOR_NONE) {
+		if (y - 1 < 0 || map[y - 1][x] != COLOR_NONE) {
 			rotate = PIECE_DOWN;
 			offset_y = 0;
-			y--;
+			y++;
 			p_x = x;
-			p_y = y + 1;
+			p_y = y - 1;
 			return;
 		}
 	}
@@ -276,7 +284,7 @@ void FallingPiece::rotate_counter (int map[12][6]) {
 	} else if (rotate == PIECE_LEFT) {
 		rotate = PIECE_DOWN;
 		p_x = x;
-		p_y = y + 1;
+		p_y = y - 1;
 	} else if (rotate == PIECE_DOWN) {
 		rotate = PIECE_RIGHT;
 		p_x = x + 1;
@@ -284,11 +292,11 @@ void FallingPiece::rotate_counter (int map[12][6]) {
 	} else if (rotate == PIECE_RIGHT) {
 		rotate = PIECE_UP;
 		p_x = x;
-		p_y = y - 1;
+		p_y = y + 1;
 	}
 }
 
-void FallingPiece::move_left (int map[12][6]) {
+void FallingPiece::move_left (int map[15][6]) {
 	if (x > 0) {
 		if (map[y][x - 1] != COLOR_NONE) {
 			return; /* Cant move to the left */
@@ -311,7 +319,7 @@ void FallingPiece::move_left (int map[12][6]) {
 	}
 }
 
-void FallingPiece::move_right (int map[12][6]) {
+void FallingPiece::move_right (int map[15][6]) {
 	if (x < 5) {
 		if (map[y][x + 1] != COLOR_NONE) {
 			return; /* Can't move to the right */
@@ -347,8 +355,8 @@ void FallingPiece::fall (void) {
 	}
 	
 	if (offset_y > 0) {
-		y++;
-		p_y++;
+		y--;
+		p_y--;
 		if (acel) {
 			offset_y = -32;
 		} else {

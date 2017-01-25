@@ -42,8 +42,9 @@ enum {
 
 class Map {
 	private:
-		int map[12][6];
-		int falling_offsets[12][6];
+		int map[15][6];
+		int falling_offsets[15][6];
+		int map_frames[15][6];
 		
 		FallingPiece f_p;
 		

@@ -5,8 +5,6 @@ nobase_dist_gamedata_DATA = images/azul_fall.png \
 	images/azul_idle_2.png \
 	images/azul_idle_3.png \
 	images/azul_idle_4.png \
-	images/azul_idle_5.png \
-	images/azul_idle_6.png \
 	images/azul_put.png \
 	images/bubble.png \
 	images/pop_1.png \
@@ -25,9 +23,19 @@ nobase_dist_gamedata_DATA = images/azul_fall.png \
 	images/rojo_idle_2.png \
 	images/rojo_idle_3.png \
 	images/rojo_idle_4.png \
-	images/rojo_idle_5.png \
-	images/rojo_idle_6.png \
-	images/rojo_put.png
+	images/rojo_put.png \
+	images/verde_fall.png \
+	images/verde_idle_1.png \
+	images/verde_idle_2.png \
+	images/verde_idle_3.png \
+	images/verde_idle_4.png \
+	images/verde_put.png \
+	images/amarillo_fall.png \
+	images/amarillo_idle_1.png \
+	images/amarillo_idle_2.png \
+	images/amarillo_idle_3.png \
+	images/amarillo_idle_4.png \
+	images/amarillo_put.png
 
 # Instalar los archivos .desktop e iconos
 applicationsdir = $(datadir)/applications
