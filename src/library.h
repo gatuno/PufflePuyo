@@ -28,6 +28,8 @@
 namespace Library {
 	/* List all images */
 	enum {
+		IMG_LOGO,
+		
 		IMG_BUBBLE,
 		IMG_BUBBLE_PUT_1,
 		IMG_BUBBLE_PUT_2,

@@ -66,14 +66,14 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	SDL_Rect rect;
 	int image;
 	
-	/* Draw a highlight for the falling piece */
+	/* Draw a highlight for the falling piece
 	rect.x = map_x + x * 38 - 4;
 	rect.y = map_y + (11 - y) * 36 - 4;
 	rect.w = 38;
 	rect.h = 36;
 	Uint32 azul = SDL_MapRGB (screen->format, 174, 159, 200);
 	
-	SDL_FillRect (screen, &rect, azul);
+	SDL_FillRect (screen, &rect, azul);*/
 	
 	/* First piece */
 	rect.x = map_x + x * 38 - 8;

@@ -35,7 +35,9 @@ nobase_dist_gamedata_DATA = images/azul_fall.png \
 	images/amarillo_idle_2.png \
 	images/amarillo_idle_3.png \
 	images/amarillo_idle_4.png \
-	images/amarillo_put.png
+	images/amarillo_put.png \
+	images/logo.png \
+	ccfacefront.ttf
 
 # Instalar los archivos .desktop e iconos
 applicationsdir = $(datadir)/applications

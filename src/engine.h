@@ -23,6 +23,9 @@
 #ifndef __ENGINE_H__
 #define __ENGINE_H__
 
+#include <SDL.h>
+#include <SDL_ttf.h>
+
 /* Main exit codes */
 enum {
 	GAME_NONE = 0, /* Not used */
@@ -33,10 +36,14 @@ enum {
 class GameEngine {
 	private:
 		SDL_Surface *screen;
+		int players;
+		
+		TTF_Font *button_font;
 		
 	public:
 		bool setup (void);
 		
+		int intro (void);
 		int loop (void);
 };
 

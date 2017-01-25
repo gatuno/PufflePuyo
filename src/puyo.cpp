@@ -62,7 +62,7 @@ int main (int argc, char *argv[]) {
 	}
 	
 	do {
-		//if (engine.intro () == GAME_QUIT) break;
+		if (engine.intro () == GAME_QUIT) break;
 		if (engine.loop () == GAME_QUIT) break;
 		//if (engine.finish () == GAME_QUIT) break;
 	} while (1 == 0);

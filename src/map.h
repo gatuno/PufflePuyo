@@ -60,8 +60,8 @@ class Map {
 		
 		int pos_x, pos_y;
 		
+		/* Map estatus, aka a piece is falling or the user is puting a piece */
 		int animating;
-	
 	/* Methods */
 		void check_islands (void);
 	public:
@@ -77,6 +77,8 @@ class Map {
 		
 		void send_down (void);
 		void send_stop_down (void);
+		
+		void set_origin (int x, int y);
 };
 
 #endif /* __MAP_H__ */

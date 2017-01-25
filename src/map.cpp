@@ -52,8 +52,8 @@ Map::Map (void) {
 	memset (falling_offsets, 0, sizeof (falling_offsets));
 	memset (map_frames, 0, sizeof (map_frames));
 	
-	pos_x = 40;
-	pos_y = 80;
+	pos_x = 0;
+	pos_y = 0;
 	
 	f_p.start_drop ();
 	animating = MAP_ANIMATE_NONE;
@@ -61,6 +61,11 @@ Map::Map (void) {
 	/* We use a circular list for the poped bubbles */
 	poped_start = 0;
 	poped_end = 0;
+}
+
+void Map::set_origin (int x, int y) {
+	pos_x = x;
+	pos_y = y;
 }
 
 void Map::draw (SDL_Surface *screen) {
@@ -460,3 +465,4 @@ void Map::check_islands (void) {
 		}
 	}
 }
+

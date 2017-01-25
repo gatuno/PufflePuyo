@@ -38,6 +38,7 @@ MediaLibrary *library = NULL;
 
 /* List all images file names */
 static const char *images_names[Library::NUM_IMGS] = {
+	"images/logo.png",
 	"images/bubble.png",
 	
 	"images/put_1.png",
