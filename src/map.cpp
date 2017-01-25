@@ -63,9 +63,10 @@ Map::Map (void) {
 	poped_end = 0;
 }
 
-void Map::set_origin (int x, int y) {
+void Map::set_origin (int x, int y, int player) {
 	pos_x = x;
 	pos_y = y;
+	this->player = player;
 }
 
 void Map::draw (SDL_Surface *screen) {
@@ -151,7 +152,8 @@ void Map::draw (SDL_Surface *screen) {
 	
 	/* Draw the poped puffles */
 	if (poped_end != poped_start) {
-		for (g = poped_start; g != poped_end; g = (g + 1) % 30) {
+		//printf ("Drawing poped puffles: %i, %i\n", poped_start, poped_end);
+		for (g = poped_start; g != poped_end; g = (g + 1) % MAX_POPED_PUFFLES) {
 			if (poped[g].y > 660) continue;
 			rect.x = poped[g].x;
 			rect.y = poped[g].y;
@@ -231,7 +233,7 @@ void Map::animate (void) {
 	
 	/* Animate the falling puffles */
 	if (poped_end != poped_start) {
-		for (g = poped_start; g != poped_end; g = (g + 1) % 30) {
+		for (g = poped_start; g != poped_end; g = (g + 1) % MAX_POPED_PUFFLES) {
 			poped[g].x += poped[g].acel_x;
 			poped[g].y += poped[g].acel_y;
 			
@@ -246,10 +248,43 @@ void Map::animate (void) {
 			
 			if (poped[g].y > 660.0 && g == poped_start) {
 				/* Delete this puffle */
-				poped_start = (poped_start + 1) % 30;
+				poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
 			}
 		}
 	}
+	
+	if (animating == MAP_ANIMATE_GAMEOVER) {
+		//printf ("Doing game overs: Pop start: %i, %i\n", poped_start, poped_end);
+		for (g = 0; g < 12; g++) {
+			for (h = 0; h < 6; h++) {
+				if (map[g][h] != COLOR_NONE) {
+					/* Make this puffle pop */
+					if (poped_start == (poped_end + 1) % MAX_POPED_PUFFLES) {
+						poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
+					}
+					poped[poped_end].x = pos_x + h * 38 - 8;
+					poped[poped_end].y = pos_y + (11 - g) * 36 - 8;
+					poped[poped_end].acel_y = RANDOM (4) * -1;
+					poped[poped_end].acel_x = (3 + RANDOM (7)) * (RANDOM(2) == 0 ? 1 : -1);
+					poped[poped_end].frame = 0;
+					poped[poped_end].color = map[g][h];
+					
+					map[g][h] = COLOR_NONE;
+					
+					poped_end = (poped_end + 1) % MAX_POPED_PUFFLES;
+					break; /* This will make the other for break; */
+				}
+			}
+			
+			if (h != 6) break;
+		}
+		
+		if (g == 12) {
+			/* All puffles have been poped, show a gameover text */
+			animating = MAP_ANIMATE_SHOW_GAMEOVER;
+		}
+	}
+	
 	new_piece = false;
 	if (animating == MAP_ANIMATE_NONE) {
 		/* Check if the falling piece is at a boundary */
@@ -338,7 +373,6 @@ void Map::animate (void) {
 		if (still == false) {
 			/* Execute the island algorithm */
 			new_piece = true;
-			//f_p.start_drop ();
 			animating = MAP_ANIMATE_NONE;
 		}
 	}
@@ -349,7 +383,13 @@ void Map::animate (void) {
 		
 		/* If nothing has been erased, then send the next piece */
 		if (animating == MAP_ANIMATE_NONE) {
-			f_p.start_drop ();
+			if (map[11][3] != COLOR_NONE) {
+				/* Game over */
+				animating = MAP_ANIMATE_GAMEOVER;
+				//printf ("Game Over\n");
+			} else {
+				f_p.start_drop ();
+			}
 		}
 	}
 }
@@ -426,8 +466,8 @@ void Map::check_islands (void) {
 					
 					/* Add these puffles to the list of falled */
 					/* If the list is full, erase the first one */
-					if (poped_start == (poped_end + 1) % 30) {
-						poped_start = (poped_start + 1) % 30;
+					if (poped_start == (poped_end + 1) % MAX_POPED_PUFFLES) {
+						poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
 					}
 					poped[poped_end].x = pos_x + g * 38 - 8;
 					poped[poped_end].y = pos_y + (11 - h) * 36 - 8;
@@ -436,7 +476,7 @@ void Map::check_islands (void) {
 					poped[poped_end].frame = 0;
 					poped[poped_end].color = color;
 					
-					poped_end = (poped_end + 1) % 30;
+					poped_end = (poped_end + 1) % MAX_POPED_PUFFLES;
 				}
 			}
 		}

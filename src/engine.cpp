@@ -311,8 +311,8 @@ int GameEngine::loop (void) {
 		player_2_keys[4] = SDLK_DOWN; /* Speed piece */
 	}
 	
-	p1.set_origin (40, 80);
-	p2.set_origin (544, 80);
+	p1.set_origin (40, 80, 1);
+	p2.set_origin (544, 80, 2);
 	
 	do {
 		last_time = SDL_GetTicks ();

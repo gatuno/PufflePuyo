@@ -37,7 +37,9 @@ enum {
 
 enum {
 	MAP_ANIMATE_NONE = 0,
-	MAP_ANIMATE_FALLING
+	MAP_ANIMATE_FALLING,
+	MAP_ANIMATE_GAMEOVER,
+	MAP_ANIMATE_SHOW_GAMEOVER
 };
 
 /* To store all the bubbles falling */
@@ -47,6 +49,8 @@ typedef struct {
 	int frame, color;
 } FalledPuffle;
 
+#define MAX_POPED_PUFFLES 60
+
 class Map {
 	private:
 		int map[15][6];
@@ -55,10 +59,11 @@ class Map {
 		
 		FallingPiece f_p;
 		
-		FalledPuffle poped[30];
+		FalledPuffle poped[MAX_POPED_PUFFLES];
 		int poped_start, poped_end;
 		
 		int pos_x, pos_y;
+		int player;
 		
 		/* Map estatus, aka a piece is falling or the user is puting a piece */
 		int animating;
@@ -78,8 +83,10 @@ class Map {
 		void send_down (void);
 		void send_stop_down (void);
 		
-		void set_origin (int x, int y);
+		void set_origin (int x, int y, int player);
 };
+
+#define MAP_EVENT SDL_USEREVENT
 
 #endif /* __MAP_H__ */
 
