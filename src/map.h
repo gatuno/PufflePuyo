@@ -26,6 +26,7 @@
 #include <SDL.h>
 
 #include "falling.h"
+#include "msg.h"
 
 enum {
 	COLOR_NONE = 0,
@@ -67,6 +68,9 @@ class Map {
 		
 		/* Map estatus, aka a piece is falling or the user is puting a piece */
 		int animating;
+		Message msgs;
+		
+		int chain;
 	/* Methods */
 		void check_islands (void);
 	public:

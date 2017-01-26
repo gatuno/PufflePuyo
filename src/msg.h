@@ -1,5 +1,5 @@
 /*
- * engine.h
+ * msg.h
  * This file is part of Puffle Puyo
  *
  * Copyright (C) 2017 - Félix Arreola Rodríguez
@@ -20,30 +20,34 @@
  * Boston, MA  02110-1301  USA
  */
 
-#ifndef __ENGINE_H__
-#define __ENGINE_H__
+#ifndef __MSG_H__
+#define __MSG_H__
 
 #include <SDL.h>
-#include <SDL_ttf.h>
 
-/* Main exit codes */
+#include "library.h"
+
+#define MAX_MESSAGE 10
+
 enum {
-	GAME_NONE = 0, /* Not used */
-	GAME_CONTINUE,
-	GAME_QUIT
+	MESSAGE_TYPE_COMBO,
+	MESSAGE_TYPE_CHAIN
 };
 
-class GameEngine {
+class Message {
 	private:
-		SDL_Surface *screen;
-		int players;
+		int msg_start, msg_end;
+		SDL_Surface *message_images[MAX_MESSAGE];
+		int timer[MAX_MESSAGE];
+		int offset;
+		int pos_x, pos_y;
 		
 	public:
-		bool setup (void);
-		
-		int intro (void);
-		int loop (void);
+		Message (void);
+		void add (int tipo, int n);
+		void draw (SDL_Surface *);
+		void set_pos (int x, int y);
 };
 
-#endif /* __ENGINE_H__ */
+#endif /* __MSG_H__ */
 

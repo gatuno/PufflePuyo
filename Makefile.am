@@ -1,8 +1,8 @@
-SUBDIRS = po po src data etc
+SUBDIRS = po src data etc
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = build-aux/config.rpath  build-aux/config.rpath
+EXTRA_DIST = build-aux/config.rpath m4/ChangeLog
 
 .PHONY: macapp
 macapp:

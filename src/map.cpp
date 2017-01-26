@@ -43,6 +43,7 @@
 #include "map.h"
 #include "falling.h"
 #include "sdl_point.h"
+#include "msg.h"
 
 #define RANDOM(x) ((int) (x ## .0 * rand () / (RAND_MAX + 1.0)))
 
@@ -61,12 +62,21 @@ Map::Map (void) {
 	/* We use a circular list for the poped bubbles */
 	poped_start = 0;
 	poped_end = 0;
+	chain = 0;
+	
+	/*map[0][0] = map[0][1] = map[1][1] = COLOR_1;
+	map[3][1] = map[2][1] = map[1][2] = map[0][2] = map[0][3] = COLOR_2;
+	map[1][3] = map[0][4] = map[0][5] = map[1][5] = COLOR_3;
+	map[2][2] = map[2][3] = map[1][4] = map[2][5] = COLOR_4;
+	map[4][1] = map[3][2] = map[3][3] = map[2][4] = COLOR_1;*/
 }
 
 void Map::set_origin (int x, int y, int player) {
 	pos_x = x;
 	pos_y = y;
 	this->player = player;
+	
+	msgs.set_pos (pos_x + (36 * 6) / 2, pos_y + 10);
 }
 
 void Map::draw (SDL_Surface *screen) {
@@ -74,7 +84,7 @@ void Map::draw (SDL_Surface *screen) {
 	SDL_Rect rect;
 	int image;
 	
-	Uint32 blanco = SDL_MapRGB (screen->format, 255, 255, 255);
+	Uint32 blanco = SDL_MapRGB (screen->format, 32, 32, 32);
 	
 	/* Draw some guide lines */
 	for (h = 0; h < 7; h++) {
@@ -176,6 +186,9 @@ void Map::draw (SDL_Surface *screen) {
 			}
 		}
 	}
+	
+	/* Draw on-screen messages */
+	msgs.draw (screen);
 }
 
 void Map::send_rotate_clock (void) {
@@ -388,6 +401,7 @@ void Map::animate (void) {
 				animating = MAP_ANIMATE_GAMEOVER;
 				//printf ("Game Over\n");
 			} else {
+				chain = 0;
 				f_p.start_drop ();
 			}
 		}
@@ -398,6 +412,8 @@ void Map::check_islands (void) {
 	int visitados[15][6];
 	int x, y, g, h;
 	int i;
+	bool was_chain = false;
+	int max_combo = 0;
 	
 	/* Max island should never be more than 12, I hope */
 	SDLPoint next[12];
@@ -455,7 +471,10 @@ void Map::check_islands (void) {
 			
 			if (size >= 4) {
 				/* We have a 4 group */
+				was_chain = true;
+				
 				animating = MAP_ANIMATE_FALLING;
+				max_combo = max_combo + size;
 				//printf ("We have a group of four:\n");
 				for (i = 0; i < size; i++) {
 					//printf ("Pos: %i, %i\n", next[i].x, next[i].y);
@@ -482,6 +501,17 @@ void Map::check_islands (void) {
 		}
 	}
 	
+	if (max_combo >= 5) {
+		msgs.add (MESSAGE_TYPE_COMBO, max_combo);
+	}
+	
+	if (was_chain) {
+		chain++;
+		if (chain >= 2) {
+			/* Add Message chain */
+			msgs.add (MESSAGE_TYPE_CHAIN, chain);
+		}
+	}
 	/* Now, compress the map */
 	for (x = 0; x < 6; x++) {
 		for (y = 0; y < 12; y++) {

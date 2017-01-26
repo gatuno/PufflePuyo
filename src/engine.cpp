@@ -20,8 +20,9 @@
  * Boston, MA  02110-1301  USA
  */
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
+#include <ctime>
 
 #include <SDL.h>
 #include <SDL_image.h>
@@ -78,13 +79,6 @@ bool GameEngine::setup (void) {
 		return false;
 	}
 	
-	library = new MediaLibrary ();
-	loaded = library->load ();
-	
-	if (loaded == false) { /* Something gone wrong */
-		return false;
-	}
-	
 	if (TTF_Init () < 0) {
 		fprintf (stderr,
 			_("Error: Can't initialize the SDL TTF library\n"
@@ -93,20 +87,15 @@ bool GameEngine::setup (void) {
 		return false;
 	}
 	
-	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
-	button_font = TTF_OpenFont (buffer_file, 40);
+	library = new MediaLibrary ();
+	loaded = library->load ();
 	
-	if (!button_font) {
-		fprintf (stderr,
-			_("Failed to load font file 'CC Face Front'\n"
-			"The error returned by SDL is:\n"
-			"%s\n"), TTF_GetError ());
-		SDL_Quit ();
-		exit (1);
+	if (loaded == false) { /* Something gone wrong */
+		return false;
 	}
 	
 	/* Random numbers generator */
-	srand (SDL_GetTicks ());
+	srand (SDL_GetTicks () * (unsigned long) time (NULL));
 	
 	return true;
 }
@@ -132,10 +121,10 @@ int GameEngine::intro (void) {
 	button_light = SDL_MapRGB (screen->format, 0xfa, 0xf1, 0xd9);
 	
 	/* Prerender text for buttons */
-	one_player_text = TTF_RenderUTF8_Blended (button_font, _("1 Player"), morado_c);
-	one_player_shadow = TTF_RenderUTF8_Blended (button_font, _("1 Player"), negro_c);
-	two_player_text = TTF_RenderUTF8_Blended (button_font, _("2 Players"), morado_c);
-	two_player_shadow = TTF_RenderUTF8_Blended (button_font, _("2 Players"), negro_c);
+	one_player_text = TTF_RenderUTF8_Blended (library->button_font, _("1 Player"), morado_c);
+	one_player_shadow = TTF_RenderUTF8_Blended (library->button_font, _("1 Player"), negro_c);
+	two_player_text = TTF_RenderUTF8_Blended (library->button_font, _("2 Players"), morado_c);
+	two_player_shadow = TTF_RenderUTF8_Blended (library->button_font, _("2 Players"), negro_c);
 	
 	big_size = one_player_text->w;
 	if (two_player_text->w > big_size) big_size = two_player_text->w;

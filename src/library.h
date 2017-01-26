@@ -24,6 +24,7 @@
 #define __LIBRARY_H__
 
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 namespace Library {
 	/* List all images */
@@ -79,6 +80,9 @@ namespace Library {
 class MediaLibrary {
 	public:
 		SDL_Surface *images[Library::NUM_IMGS];
+		
+		TTF_Font *points_font;
+		TTF_Font *button_font;
 		
 		/* Main loading function */
 		int load (void);

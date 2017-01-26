@@ -45,7 +45,7 @@ void FallingPiece::reset (void) {
 	color_2 = COLOR_1 + RANDOM (4);
 	
 	//color_1 = COLOR_1;
-	//color_2 = COLOR_2;
+	//color_2 = COLOR_1;
 	
 	rotate = PIECE_UP;
 	offset_y = 0;

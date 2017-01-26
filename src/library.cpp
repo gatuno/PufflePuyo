@@ -22,6 +22,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -105,6 +106,30 @@ int MediaLibrary::load (void) {
 		
 		images[g] = image;
 		/* TODO: Show loading progress */
+	}
+	
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	button_font = TTF_OpenFont (buffer_file, 40);
+	
+	if (!button_font) {
+		fprintf (stderr,
+			_("Failed to load font file 'CC Face Front'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
+		SDL_Quit ();
+		return false;
+	}
+	
+	sprintf (buffer_file, "%s%s", systemdata_path, "ccfacefront.ttf");
+	points_font = TTF_OpenFont (buffer_file, 30);
+	
+	if (!points_font) {
+		fprintf (stderr,
+			_("Failed to load font file 'CC Face Front'\n"
+			"The error returned by SDL is:\n"
+			"%s\n"), TTF_GetError ());
+		SDL_Quit ();
+		return false;
 	}
 	
 	return true;
