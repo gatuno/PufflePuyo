@@ -280,6 +280,7 @@ int GameEngine::loop (void) {
 	Map p1;
 	Map p2;
 	
+	SDL_EnableKeyRepeat (300, 72);
 	if (players == 1) {
 		player_1_keys[0] = SDLK_a; /* Rotate clockwise */
 		player_1_keys[1] = SDLK_s; /* Rotate counter-clockwise */

@@ -33,7 +33,8 @@ enum {
 	COLOR_1,
 	COLOR_2,
 	COLOR_3,
-	COLOR_4
+	COLOR_4,
+	COLOR_5 /* Gem */
 };
 
 enum {
@@ -88,6 +89,8 @@ class Map {
 		void send_stop_down (void);
 		
 		void set_origin (int x, int y, int player);
+		
+		void add_falling_puffle (int color, int x, int y);
 };
 
 #define MAP_EVENT SDL_USEREVENT

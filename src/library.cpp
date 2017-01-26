@@ -81,7 +81,14 @@ static const char *images_names[Library::NUM_IMGS] = {
 	"images/amarillo_idle_3.png",
 	"images/amarillo_idle_4.png",
 	"images/amarillo_put.png",
-	"images/amarillo_fall.png"
+	"images/amarillo_fall.png",
+	
+	"images/blanco_fall.png",
+	"images/blanco_idle_1.png",
+	"images/blanco_idle_2.png",
+	"images/blanco_idle_3.png",
+	"images/blanco_idle_4.png",
+	"images/blanco_put.png"
 };
 		
 int MediaLibrary::load (void) {

@@ -36,6 +36,12 @@ nobase_dist_gamedata_DATA = images/azul_fall.png \
 	images/amarillo_idle_3.png \
 	images/amarillo_idle_4.png \
 	images/amarillo_put.png \
+	images/blanco_fall.png \
+	images/blanco_idle_1.png \
+	images/blanco_idle_2.png \
+	images/blanco_idle_3.png \
+	images/blanco_idle_4.png \
+	images/blanco_put.png \
 	images/logo.png \
 	ccfacefront.ttf
 

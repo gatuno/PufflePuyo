@@ -163,6 +163,13 @@ void Message::addAllClear (void) {
 	add (_("All clear!"), am);
 }
 
+void Message::addTechBonus (void) {
+	SDL_Color verde;
+	
+	verde.r = 0x33; verde.g = 0xcc; verde.b = 0;
+	add (_("Tech bouns"), verde);
+}
+
 void Message::add (char *buffer, SDL_Color c) {
 	int g;
 	

@@ -33,13 +33,16 @@ enum {
 };
 
 class FallingPiece {
-	public:
+	private:
 		int x, y; /* The main part of the piece */
 		int p_x, p_y; /* The other part of the piece */
 		int color_1, color_2;
 		int rotate;
 		int offset_y;
 		bool acel;
+		
+		int gem_counter;
+	public:
 	/* Methods */
 		FallingPiece (void);
 		

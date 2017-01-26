@@ -308,7 +308,7 @@ void Map::animate (void) {
 			/* Check now for collissions */
 			f_p.get_xy (&x1, &y1, &x2, &y2);
 			f_p.get_color (&color_1, &color_2);
-		
+			
 			if (y1 == 0 || y2 == 0) {
 				/* Bottom, stop the piece */
 				/* Put the Piece on the map */
@@ -425,6 +425,42 @@ void Map::check_islands (void) {
 	int size;
 	memset (visitados, 0, sizeof (visitados));
 	
+	/* Search for a special gem */
+	for (y = 0; y < 13; y++) {
+		for (x = 0; x < 6; x++) {
+			if (map[y][x] == COLOR_5) {
+				map[y][x] = COLOR_NONE;
+				animating = MAP_ANIMATE_FALLING;
+				/* Add these puffles to the list of falled */
+				add_falling_puffle (COLOR_5, x, y);
+				
+				/* We have a special gem */
+				if (y == 0) {
+					/* Tech bonus, It doesn't destroy anything */
+					msgs.addTechBonus ();
+				} else {
+					color = map[y - 1][x];
+					
+					/* Destroy every gem color */
+					for (g = 0; g < 13; g++) {
+						for (h = 0; h < 6; h++) {
+							if (map[g][h] == color) {
+								/* Destroy this gem */
+								map[g][h] = COLOR_NONE;
+								
+								add_falling_puffle (color, h, g);
+							}
+						}
+					}
+				}
+				
+				break;
+			}
+		}
+		
+		if (x != 6) break; /* If the for was break'ed, break this for */
+	}
+	
 	for (y = 0; y < 12; y++) {
 		for (x = 0; x < 6; x++) {
 			if (visitados[y][x] == 1) continue;
@@ -488,18 +524,7 @@ void Map::check_islands (void) {
 					map[h][g] = COLOR_NONE;
 					
 					/* Add these puffles to the list of falled */
-					/* If the list is full, erase the first one */
-					if (poped_start == (poped_end + 1) % MAX_POPED_PUFFLES) {
-						poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
-					}
-					poped[poped_end].x = pos_x + g * 38 - 8;
-					poped[poped_end].y = pos_y + (11 - h) * 36 - 8;
-					poped[poped_end].acel_y = RANDOM (4) * -1;
-					poped[poped_end].acel_x = (3 + RANDOM (7)) * (RANDOM(2) == 0 ? 1 : -1);
-					poped[poped_end].frame = 0;
-					poped[poped_end].color = color;
-					
-					poped_end = (poped_end + 1) % MAX_POPED_PUFFLES;
+					add_falling_puffle (color, g, h);
 				}
 			}
 		}
@@ -554,5 +579,20 @@ void Map::check_islands (void) {
 			}
 		}
 	}
+}
+
+void Map::add_falling_puffle (int color, int x, int y) {
+	/* If the list is full, erase the first one */
+	if (poped_start == (poped_end + 1) % MAX_POPED_PUFFLES) {
+		poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
+	}
+	poped[poped_end].x = pos_x + x * 38 - 8;
+	poped[poped_end].y = pos_y + (11 - y) * 36 - 8;
+	poped[poped_end].acel_y = RANDOM (4) * -1;
+	poped[poped_end].acel_x = (3 + RANDOM (7)) * (RANDOM(2) == 0 ? 1 : -1);
+	poped[poped_end].frame = 0;
+	poped[poped_end].color = color;
+	
+	poped_end = (poped_end + 1) % MAX_POPED_PUFFLES;
 }
 
