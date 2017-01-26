@@ -71,6 +71,7 @@ Map::Map (void) {
 	map[4][1] = map[3][2] = map[3][3] = map[2][4] = COLOR_1;*/
 }
 
+/* This function sets the start corner of this map */
 void Map::set_origin (int x, int y, int player) {
 	pos_x = x;
 	pos_y = y;
@@ -79,6 +80,7 @@ void Map::set_origin (int x, int y, int player) {
 	msgs.set_pos (pos_x + (36 * 6) / 2, pos_y + 10);
 }
 
+/* Main drawing function of the map */
 void Map::draw (SDL_Surface *screen) {
 	int g, h;
 	SDL_Rect rect;
@@ -107,6 +109,7 @@ void Map::draw (SDL_Surface *screen) {
 		SDL_FillRect (screen, &rect, blanco);
 	}
 	
+	/* Draw all puffles on the map */
 	for (g = 0; g < 12; g++) {
 		for (h = 0; h < 6; h++) {
 			if (map[g][h] == COLOR_NONE) {
@@ -116,19 +119,14 @@ void Map::draw (SDL_Surface *screen) {
 			rect.x = pos_x + h * 38 - 8;
 			rect.y = pos_y + (11 - g) * 36 - 8;
 			
+			/* If the puffle is falling, add the offset */
 			if (falling_offsets[g][h] > 0) {
 				rect.y = rect.y - falling_offsets[g][h];
 			}
-			if (map[g][h] == COLOR_1) {
-				image = Library::IMG_PUFFLE_BLUE_IDLE_1;
-			} else if (map[g][h] == COLOR_2) {
-				image = Library::IMG_PUFFLE_RED_IDLE_1;
-			} else if (map[g][h] == COLOR_3) {
-				image = Library::IMG_PUFFLE_GREEN_IDLE_1;
-			} else if (map[g][h] == COLOR_4) {
-				image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
-			}
 			
+			image = Library::IMG_PUFFLE_BLUE_IDLE_1 + 6 * (map[g][h] - COLOR_1);
+			
+			/* Animate the puffle eyes */
 			if (map_frames[g][h] == 96 || map_frames[g][h] == 101) {
 				image += 1;
 			} else if (map_frames[g][h] == 97 || map_frames[g][h] == 102) {
@@ -164,7 +162,7 @@ void Map::draw (SDL_Surface *screen) {
 	if (poped_end != poped_start) {
 		//printf ("Drawing poped puffles: %i, %i\n", poped_start, poped_end);
 		for (g = poped_start; g != poped_end; g = (g + 1) % MAX_POPED_PUFFLES) {
-			if (poped[g].y > 660) continue;
+			if (poped[g].y > 660) continue; /* The puffle is out of the screen, skip */
 			rect.x = poped[g].x;
 			rect.y = poped[g].y;
 			
@@ -192,11 +190,15 @@ void Map::draw (SDL_Surface *screen) {
 }
 
 void Map::send_rotate_clock (void) {
-	f_p.rotate_clock (map);
+	if (animating == MAP_ANIMATE_NONE) {
+		f_p.rotate_clock (map);
+	}
 }
 
 void Map::send_rotate_counter (void) {
-	f_p.rotate_counter (map);
+	if (animating == MAP_ANIMATE_NONE) {
+		f_p.rotate_counter (map);
+	}
 }
 
 void Map::send_move_left (void) {
@@ -225,13 +227,14 @@ void Map::send_stop_down (void) {
 	}
 }
 
+/* Main function to animate everything in the map */
 void Map::animate (void) {
 	int x1, x2, y1, y2;
 	int color_1, color_2;
 	int g, h;
 	bool new_piece;
 	
-	/* Animate all puffles in map */
+	/* Animate all puffles in map aka "Blinking eyes" */
 	for (g = 0; g < 12; g++) {
 		for (h = 0; h < 6; h++) {
 			if (map[g][h] != COLOR_NONE) {
@@ -376,7 +379,7 @@ void Map::animate (void) {
 		for (g = 0; g < 12; g++) {
 			for (h = 0; h < 6; h++) {
 				if (falling_offsets[g][h] != 0) {
-					falling_offsets[g][h] -= 4;
+					falling_offsets[g][h] -= 8;
 					
 					if (falling_offsets[g][h] > 0) still = true;
 				}
@@ -414,6 +417,7 @@ void Map::check_islands (void) {
 	int i;
 	bool was_chain = false;
 	int max_combo = 0;
+	int all_clear;
 	
 	/* Max island should never be more than 12, I hope */
 	SDLPoint next[12];
@@ -502,16 +506,32 @@ void Map::check_islands (void) {
 	}
 	
 	if (max_combo >= 5) {
-		msgs.add (MESSAGE_TYPE_COMBO, max_combo);
+		msgs.addCombo (max_combo);
 	}
 	
 	if (was_chain) {
 		chain++;
 		if (chain >= 2) {
 			/* Add Message chain */
-			msgs.add (MESSAGE_TYPE_CHAIN, chain);
+			msgs.addChain (chain);
 		}
 	}
+	
+	all_clear = 0;
+	/* Check if all clear bonus */
+	for (x = 0; x < 6; x++) {
+		for (y = 0; y < 12; y++) {
+			if (map[y][x] == COLOR_NONE) {
+				all_clear++;
+			}
+		}
+	}
+	
+	if (was_chain && all_clear == 72) {
+		/* Add "All clear" bonues */
+		msgs.addAllClear ();
+	}
+	
 	/* Now, compress the map */
 	for (x = 0; x < 6; x++) {
 		for (y = 0; y < 12; y++) {

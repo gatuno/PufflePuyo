@@ -50,7 +50,7 @@ typedef struct {
 	int frame, color;
 } FalledPuffle;
 
-#define MAX_POPED_PUFFLES 60
+#define MAX_POPED_PUFFLES 72
 
 class Map {
 	private:

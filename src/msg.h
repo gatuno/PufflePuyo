@@ -29,11 +29,6 @@
 
 #define MAX_MESSAGE 10
 
-enum {
-	MESSAGE_TYPE_COMBO,
-	MESSAGE_TYPE_CHAIN
-};
-
 class Message {
 	private:
 		int msg_start, msg_end;
@@ -41,10 +36,13 @@ class Message {
 		int timer[MAX_MESSAGE];
 		int offset;
 		int pos_x, pos_y;
+		void add (char *, SDL_Color);
 		
 	public:
 		Message (void);
-		void add (int tipo, int n);
+		void addChain (int n);
+		void addCombo (int n);
+		void addAllClear (void);
 		void draw (SDL_Surface *);
 		void set_pos (int x, int y);
 };

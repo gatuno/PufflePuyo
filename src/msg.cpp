@@ -135,18 +135,36 @@ void Message::draw (SDL_Surface *screen) {
 	}
 }
 
-void Message::add (int type, int n) {
+void Message::addChain (int n) {
 	char buffer[256];
-	int g;
+	SDL_Color rojo;
+	
+	rojo.r = 0xee; rojo.g = 0x44; rojo.b = 0x44;
+	
+	sprintf (buffer, _("%i Chain!"), n);
+	
+	add (buffer, rojo);
+}
+
+void Message::addCombo (int n) {
+	char buffer[256];
 	SDL_Color azul;
 	
-	if (type == MESSAGE_TYPE_COMBO) {
-		sprintf (buffer, _("%i Combo!"), n);
-		azul.r = 0; azul.g = 0xcc; azul.b = 0xff;
-	} else if (type == MESSAGE_TYPE_CHAIN) {
-		sprintf (buffer, _("%i Chain!"), n);
-		azul.r = 0xee; azul.g = 0x44; azul.b = 0x44;
-	}
+	azul.r = 0; azul.g = 0xcc; azul.b = 0xff;
+	sprintf (buffer, _("%i Combo!"), n);
+	
+	add (buffer, azul);
+}
+
+void Message::addAllClear (void) {
+	SDL_Color am;
+	
+	am.r = 0xff; am.g = 0xff; am.b = 0;
+	add (_("All clear!"), am);
+}
+
+void Message::add (char *buffer, SDL_Color c) {
+	int g;
 	
 	if (msg_end < msg_start) {
 		g = msg_end + MAX_MESSAGE - msg_start;
@@ -163,7 +181,7 @@ void Message::add (int type, int n) {
 		msg_start = (msg_start + 1) % MAX_MESSAGE;
 	}
 	
-	message_images[msg_end] = TTF_RenderUTF8_Blended (library->points_font, buffer, azul);
+	message_images[msg_end] = TTF_RenderUTF8_Blended (library->points_font, buffer, c);
 	timer[msg_end] = 0;
 	
 	msg_end = (msg_end + 1) % MAX_MESSAGE;

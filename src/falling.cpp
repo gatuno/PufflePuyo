@@ -80,15 +80,7 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	rect.y = map_y + (11 - y) * 36 - 8;
 	rect.y += offset_y;
 	
-	if (color_1 == COLOR_1) {
-		image = Library::IMG_PUFFLE_BLUE_IDLE_1;
-	} else if (color_1 == COLOR_2) {
-		image = Library::IMG_PUFFLE_RED_IDLE_1;
-	} else if (color_1 == COLOR_3) {
-		image = Library::IMG_PUFFLE_GREEN_IDLE_1;
-	} else if (color_1 == COLOR_4) {
-		image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
-	}
+	image = Library::IMG_PUFFLE_BLUE_IDLE_1 + 6 * (color_1 - COLOR_1);
 	
 	rect.w = library->images [image]->w;
 	rect.h = library->images [image]->h;
@@ -110,15 +102,7 @@ void FallingPiece::draw (SDL_Surface *screen, int map_x, int map_y) {
 	rect.y = map_y + (11 - p_y) * 36 - 8;
 	rect.y += offset_y;
 	
-	if (color_2 == COLOR_1) {
-		image = Library::IMG_PUFFLE_BLUE_IDLE_1;
-	} else if (color_2 == COLOR_2) {
-		image = Library::IMG_PUFFLE_RED_IDLE_1;
-	} else if (color_2 == COLOR_3) {
-		image = Library::IMG_PUFFLE_GREEN_IDLE_1;
-	} else if (color_2 == COLOR_4) {
-		image = Library::IMG_PUFFLE_YELLOW_IDLE_1;
-	}
+	image = Library::IMG_PUFFLE_BLUE_IDLE_1 + 6 * (color_2 - COLOR_1);
 	
 	rect.w = library->images [image]->w;
 	rect.h = library->images [image]->h;
@@ -302,7 +286,7 @@ void FallingPiece::move_left (int map[15][6]) {
 			return; /* Cant move to the left */
 		}
 	}
-	if (p_x > 0 && p_y > 0) {
+	if (p_x > 0 && p_y >= 0) {
 		if (map[p_y][p_x - 1] != COLOR_NONE) {
 			return; /* The other part of the falling piece can't move to the left */
 		}
@@ -325,7 +309,7 @@ void FallingPiece::move_right (int map[15][6]) {
 			return; /* Can't move to the right */
 		}
 	}
-	if (p_x < 5 && p_y > 0) {
+	if (p_x < 5 && p_y >= 0) {
 		if (map[p_y][p_x + 1] != COLOR_NONE) {
 			return;
 		}
