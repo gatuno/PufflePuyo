@@ -298,6 +298,8 @@ void Map::animate (void) {
 		if (g == 12) {
 			/* All puffles have been poped, show a gameover text */
 			animating = MAP_ANIMATE_SHOW_GAMEOVER;
+			
+			msgs.addGameOver ();
 		}
 	}
 	

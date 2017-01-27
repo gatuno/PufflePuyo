@@ -44,6 +44,7 @@ class Message {
 		void addCombo (int n);
 		void addAllClear (void);
 		void addTechBonus (void);
+		void addGameOver (void);
 		void draw (SDL_Surface *);
 		void set_pos (int x, int y);
 };

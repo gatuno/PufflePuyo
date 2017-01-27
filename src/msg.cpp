@@ -170,6 +170,13 @@ void Message::addTechBonus (void) {
 	add (_("Tech bouns"), verde);
 }
 
+void Message::addGameOver (void) {
+	SDL_Color rosa;
+	
+	rosa.r = 0xff; rosa.g = 0xcc; rosa.b = 0xff;
+	add (_("Game Over"), rosa);
+}
+
 void Message::add (char *buffer, SDL_Color c) {
 	int g;
 	
