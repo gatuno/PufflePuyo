@@ -45,11 +45,11 @@ void FallingPiece::reset (void) {
 	gem_counter++;
 	if (gem_counter == 25) {
 		gem_counter = 0;
-		color_1 = COLOR_5;
+		color_1 = COLOR_GEM;
 	} else {
-		color_1 = COLOR_1 + RANDOM (4);
+		color_1 = COLOR_1 + RANDOM (5);
 	}
-	color_2 = COLOR_1 + RANDOM (4);
+	color_2 = COLOR_1 + RANDOM (5);
 	
 	//color_1 = COLOR_1;
 	//color_2 = COLOR_1;

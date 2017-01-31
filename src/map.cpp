@@ -68,7 +68,8 @@ Map::Map (void) {
 	map[3][1] = map[2][1] = map[1][2] = map[0][2] = map[0][3] = COLOR_2;
 	map[1][3] = map[0][4] = map[0][5] = map[1][5] = COLOR_3;
 	map[2][2] = map[2][3] = map[1][4] = map[2][5] = COLOR_4;
-	map[4][1] = map[3][2] = map[3][3] = map[2][4] = COLOR_1;*/
+	map[4][1] = map[3][2] = map[3][3] = map[2][4] = COLOR_1;
+	map[5][1] = COLOR_BLOCK;*/
 }
 
 /* This function sets the start corner of this map */
@@ -430,11 +431,11 @@ void Map::check_islands (void) {
 	/* Search for a special gem */
 	for (y = 0; y < 13; y++) {
 		for (x = 0; x < 6; x++) {
-			if (map[y][x] == COLOR_5) {
+			if (map[y][x] == COLOR_GEM) {
 				map[y][x] = COLOR_NONE;
 				animating = MAP_ANIMATE_FALLING;
 				/* Add these puffles to the list of falled */
-				add_falling_puffle (COLOR_5, x, y);
+				add_falling_puffle (COLOR_GEM, x, y);
 				
 				/* We have a special gem */
 				if (y == 0) {
@@ -443,14 +444,19 @@ void Map::check_islands (void) {
 				} else {
 					color = map[y - 1][x];
 					
-					/* Destroy every gem color */
-					for (g = 0; g < 13; g++) {
-						for (h = 0; h < 6; h++) {
-							if (map[g][h] == color) {
-								/* Destroy this gem */
-								map[g][h] = COLOR_NONE;
+					if (color == COLOR_BLOCK) {
+						/* Sorry, the gem can't destroy the black ones */
+						msgs.addTechBonus ();
+					} else {
+						/* Destroy every gem color */
+						for (g = 0; g < 13; g++) {
+							for (h = 0; h < 6; h++) {
+								if (map[g][h] == color) {
+									/* Destroy this gem */
+									map[g][h] = COLOR_NONE;
 								
-								add_falling_puffle (color, h, g);
+									add_falling_puffle (color, h, g);
+								}
 							}
 						}
 					}
@@ -467,7 +473,7 @@ void Map::check_islands (void) {
 		for (x = 0; x < 6; x++) {
 			if (visitados[y][x] == 1) continue;
 			
-			if (map[y][x] == COLOR_NONE) {
+			if (map[y][x] == COLOR_NONE || map[y][x] == COLOR_BLOCK) {
 				visitados[y][x] = 1;
 				continue;
 			}
@@ -567,6 +573,11 @@ void Map::check_islands (void) {
 				g = x;
 				
 				for (i = y + 1; i < 13; i++) {
+					if (map[i][x] == COLOR_BLOCK) {
+						/* A block, let's skip y to this i */
+						y = i - 1;
+						break;
+					}
 					if (map[i][x] != COLOR_NONE) {
 						/* Move this piece */
 						map[y][x] = map[i][x];

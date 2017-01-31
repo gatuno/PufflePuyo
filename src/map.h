@@ -34,7 +34,8 @@ enum {
 	COLOR_2,
 	COLOR_3,
 	COLOR_4,
-	COLOR_5 /* Gem */
+	COLOR_BLOCK,
+	COLOR_GEM /* Gem */
 };
 
 enum {
