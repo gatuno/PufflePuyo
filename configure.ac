@@ -1,4 +1,4 @@
-AC_INIT([Puffle Puyo], [0.4.0], [], [puffle_puyo])
+AC_INIT([Puffle Puyo], [0.5.0], [], [puffle_puyo])
 
 AC_REVISION([Revision 1])
 
