@@ -45,7 +45,21 @@
 #include "sdl_point.h"
 #include "msg.h"
 
+#include "rotar.h"
+
 #define RANDOM(x) ((int) (x ## .0 * rand () / (RAND_MAX + 1.0)))
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define RMASK 0xff000000
+#define GMASK 0x00ff0000
+#define BMASK 0x0000ff00
+#define AMASK 0x000000ff
+#else
+#define RMASK 0x000000ff
+#define GMASK 0x0000ff00
+#define BMASK 0x00ff0000
+#define AMASK 0xff000000
+#endif
 
 Map::Map (void) {
 	/* Clear map */
@@ -64,6 +78,8 @@ Map::Map (void) {
 	poped_end = 0;
 	chain = 0;
 	
+	/* Create a blank surface for rotating the map */
+	for_rotation = SDL_CreateRGBSurface (SDL_SWSURFACE, 38 * 6, 36 * 12, 32, RMASK, GMASK, BMASK, AMASK);
 	/*map[0][0] = map[0][1] = map[1][1] = COLOR_1;
 	map[3][1] = map[2][1] = map[1][2] = map[0][2] = map[0][3] = COLOR_2;
 	map[1][3] = map[0][4] = map[0][5] = map[1][5] = COLOR_3;
@@ -81,33 +97,40 @@ void Map::set_origin (int x, int y, int player) {
 	msgs.set_pos (pos_x + (36 * 6) / 2, pos_y + 10);
 }
 
-/* Main drawing function of the map */
-void Map::draw (SDL_Surface *screen) {
+void Map::private_draw (SDL_Surface *screen, int start_x, int start_y, int grados, bool black) {
 	int g, h;
 	SDL_Rect rect;
+	Uint32 blanco = SDL_MapRGB (screen->format, 32, 32, 32);
 	int image;
 	
-	Uint32 blanco = SDL_MapRGB (screen->format, 32, 32, 32);
+	SDL_Surface *rot, *rot_bubble;
+	int cx, cy;
 	
 	/* Draw some guide lines */
 	for (h = 0; h < 7; h++) {
-		rect.x = pos_x + (h * 38) - 4;
+		rect.x = start_x + (h * 38) - 4;
 		rect.w = 1;
 		
-		rect.y = pos_y - 4;
+		rect.y = start_y - 4;
 		rect.h = (12 * 36);
 		
 		SDL_FillRect (screen, &rect, blanco);
 	}
 	
 	for (g = 0; g < 13; g++) {
-		rect.y = pos_y + (g * 36) - 4;
+		rect.y = start_y + (g * 36) - 4;
 		rect.h = 1;
 		
-		rect.x = pos_x - 4;
+		rect.x = start_x - 4;
 		rect.w = (6 * 38);
 		
 		SDL_FillRect (screen, &rect, blanco);
+	}
+	
+	if (grados != 0) {
+		rot_bubble = rotozoomSurface (library->images [Library::IMG_BUBBLE], (double) (360 - grados), 1);
+	} else {
+		rot_bubble = library->images [Library::IMG_BUBBLE];
 	}
 	
 	/* Draw all puffles on the map */
@@ -117,8 +140,11 @@ void Map::draw (SDL_Surface *screen) {
 				continue;
 			}
 			
-			rect.x = pos_x + h * 38 - 8;
-			rect.y = pos_y + (11 - g) * 36 - 8;
+			if (map[g][h] == COLOR_BLOCK && !black) {
+				continue;
+			}
+			rect.x = start_x + h * 38 - 8;
+			rect.y = start_y + (11 - g) * 36 - 8;
 			
 			/* If the puffle is falling, add the offset */
 			if (falling_offsets[g][h] > 0) {
@@ -135,23 +161,78 @@ void Map::draw (SDL_Surface *screen) {
 			} else if (map_frames[g][h] >= 98 && map_frames[g][h] <= 100) {
 				image += 3;
 			}
-			rect.w = library->images [image]->w;
-			rect.h = library->images [image]->h;
 			
-			SDL_BlitSurface (library->images [image], NULL, screen, &rect);
+			rot = library->images[image];
+			if (grados != 0) {
+				/* Rotar antes */
+				rot = rotozoomSurface (library->images[image], (double) (360 - grados), 1);
+				
+				coordenadas_centro (22, 22, 44, 44, (double) (360 - grados), &cx, &cy);
+				rect.x += cx;
+				rect.y += cy;
+			}
+			rect.w = rot->w;
+			rect.h = rot->h;
+			
+			SDL_BlitSurface (rot, NULL, screen, &rect);
+			
+			if (grados != 0) {
+				SDL_FreeSurface (rot);
+			}
 			
 			/* Draw the bubble */
-			rect.x = pos_x + h * 38 - 8;
-			rect.y = pos_y + (11 - g) * 36 - 8;
+			rect.x = start_x + h * 38 - 8;
+			rect.y = start_y + (11 - g) * 36 - 8;
 			if (falling_offsets[g][h] > 0) {
 				rect.y = rect.y - falling_offsets[g][h];
 			}
 			
-			rect.w = library->images [Library::IMG_BUBBLE]->w;
-			rect.h = library->images [Library::IMG_BUBBLE]->h;
+			rect.w = rot_bubble->w;
+			rect.h = rot_bubble->h;
 			
-			SDL_BlitSurface (library->images [Library::IMG_BUBBLE], NULL, screen, &rect);
+			if (grados != 0) {
+				rect.x += cx;
+				rect.y += cy;
+			}
+			SDL_BlitSurface (rot_bubble, NULL, screen, &rect);
 		}
+	}
+	
+	if (grados != 0) {
+		SDL_FreeSurface (rot_bubble);
+	}
+}
+
+/* Main drawing function of the map */
+void Map::draw (SDL_Surface *screen) {
+	int g, h;
+	SDL_Rect rect;
+	int image;
+	int save_pos_x, save_pos_y;
+	Uint32 negro;
+	SDL_Surface *rotada;
+	
+	if (animating == MAP_ANIMATE_ROTATING) {
+		/* Erase the for rotation surface */
+		negro = SDL_MapRGB (for_rotation->format, 0, 0, 0);
+		SDL_FillRect (for_rotation, NULL, negro);
+		
+		private_draw (for_rotation, 0, 0, grados, false);
+		
+		rotada = rotozoomSurface (for_rotation, (double) grados, 1);
+		
+		coordenadas_centro (114, 216, for_rotation->w, for_rotation->h, (double) grados, &g, &h);
+		
+		rect.x = pos_x + g;
+		rect.y = pos_y + h;
+		rect.w = rotada->w;
+		rect.h = rotada->h;
+		
+		SDL_BlitSurface (rotada, NULL, screen, &rect);
+		SDL_FreeSurface (rotada);
+		
+	} else {
+		private_draw (screen, pos_x, pos_y, 0, true);
 	}
 	
 	/* Draw the falling piece */
@@ -228,11 +309,20 @@ void Map::send_stop_down (void) {
 	}
 }
 
+void Map::send_rotate (void) {
+	if (animating == MAP_ANIMATE_NONE) {
+		/* Start a rotating animating */
+		animating = MAP_ANIMATE_ROTATING;
+		
+		grados = 0;
+	}
+}
+
 /* Main function to animate everything in the map */
 void Map::animate (void) {
-	int x1, x2, y1, y2;
+	int x1, x2, y1, y2, x, y;
 	int color_1, color_2;
-	int g, h;
+	int g, h, i;
 	bool new_piece;
 	
 	/* Animate all puffles in map aka "Blinking eyes" */
@@ -276,19 +366,10 @@ void Map::animate (void) {
 			for (h = 0; h < 6; h++) {
 				if (map[g][h] != COLOR_NONE) {
 					/* Make this puffle pop */
-					if (poped_start == (poped_end + 1) % MAX_POPED_PUFFLES) {
-						poped_start = (poped_start + 1) % MAX_POPED_PUFFLES;
-					}
-					poped[poped_end].x = pos_x + h * 38 - 8;
-					poped[poped_end].y = pos_y + (11 - g) * 36 - 8;
-					poped[poped_end].acel_y = RANDOM (4) * -1;
-					poped[poped_end].acel_x = (3 + RANDOM (7)) * (RANDOM(2) == 0 ? 1 : -1);
-					poped[poped_end].frame = 0;
-					poped[poped_end].color = map[g][h];
+					add_falling_puffle (map[g][h], h, g);
 					
 					map[g][h] = COLOR_NONE;
 					
-					poped_end = (poped_end + 1) % MAX_POPED_PUFFLES;
 					break; /* This will make the other for break; */
 				}
 			}
@@ -304,6 +385,69 @@ void Map::animate (void) {
 		}
 	}
 	
+	if (animating == MAP_ANIMATE_ROTATING) {
+		grados++;
+		
+		if (grados == 180) {
+			/* Flip pieces */
+			grados = 0;
+			
+			for (g = 0; g < 6; g++) {
+				for (h = 0; h < 6; h++) {
+					color_1 = map[g][h];
+					color_2 = map[11 - g][5 - h];
+					
+					if (color_1 == COLOR_BLOCK && color_2 == COLOR_BLOCK) continue; /* Ninguno de los dos se mueve */
+					if (color_1 == COLOR_BLOCK) {
+						/* Eliminar el otro */
+						if (color_2 != COLOR_NONE) add_falling_puffle (color_2, h, g);
+						
+						map[11 - g][5 - h] = COLOR_NONE;
+					} else if (color_2 == COLOR_BLOCK) {
+						if (color_1 != COLOR_NONE) add_falling_puffle (color_1, 5 - h, 11 - g);
+						
+						map[g][h] = COLOR_NONE;
+					} else {
+						map[g][h] = color_2;
+						map[11 - g][5 - h] = color_1;
+					}
+				}
+			}
+			
+			/* Comprimir el mapa */
+			animating = MAP_ANIMATE_FALLING; /* FIXME */
+			
+			/* Now, compress the map */
+			for (x = 0; x < 6; x++) {
+				for (y = 0; y < 12; y++) {
+					/* First, locate a empty spot */
+					if (map[y][x] == COLOR_NONE) {
+						g = x;
+				
+						for (i = y + 1; i < 13; i++) {
+							if (map[i][x] == COLOR_BLOCK) {
+								/* A block, let's skip y to this i */
+								y = i - 1;
+								break;
+							}
+							if (map[i][x] != COLOR_NONE) {
+								/* Move this piece */
+								map[y][x] = map[i][x];
+								map[i][x] = COLOR_NONE;
+						
+								falling_offsets[y][x] = (i - y) * 36;
+								break;
+							}
+						}
+				
+						if (i == 12) break; /* We don't have more pieces up this column */
+					}
+				}
+			}
+		}
+		
+		return;
+	}
 	new_piece = false;
 	if (animating == MAP_ANIMATE_NONE) {
 		/* Check if the falling piece is at a boundary */

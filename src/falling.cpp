@@ -65,6 +65,7 @@ void FallingPiece::start_drop (void) {
 	p_x = 3;
 	p_y = 12;
 	
+	rotate = PIECE_UP;
 	offset_y = -36;
 }
 

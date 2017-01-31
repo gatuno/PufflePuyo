@@ -272,7 +272,7 @@ int GameEngine::loop (void) {
 	SDLKey key;
 	Uint32 last_time, now_time;
 	SDL_Rect rect;
-	SDLKey player_1_keys[5], player_2_keys[5];
+	SDLKey player_1_keys[6], player_2_keys[6];
 	Uint32 fondo;
 	
 	fondo = SDL_MapRGB (screen->format, 0xa2, 0x76, 0xab);
@@ -287,18 +287,21 @@ int GameEngine::loop (void) {
 		player_1_keys[2] = SDLK_LEFT; /* move left */
 		player_1_keys[3] = SDLK_RIGHT; /* move right */
 		player_1_keys[4] = SDLK_DOWN; /* Speed piece */
+		player_1_keys[5] = SDLK_r; /* Rotate the board */
 	} else {
 		player_1_keys[0] = SDLK_a; /* Rotate clockwise */
 		player_1_keys[1] = SDLK_s; /* Rotate counter-clockwise */
 		player_1_keys[2] = SDLK_j; /* move left */
 		player_1_keys[3] = SDLK_l; /* move right */
 		player_1_keys[4] = SDLK_k; /* Speed piece */
+		player_1_keys[5] = SDLK_r; /* Rotate the board */
 		
 		player_2_keys[0] = SDLK_KP1; /* Rotate clockwise */
 		player_2_keys[1] = SDLK_KP2; /* Rotate counter-clockwise */
 		player_2_keys[2] = SDLK_LEFT; /* move left */
 		player_2_keys[3] = SDLK_RIGHT; /* move right */
 		player_2_keys[4] = SDLK_DOWN; /* Speed piece */
+		player_2_keys[5] = SDLK_KP3; /* Rotate the board */
 	}
 	
 	p1.set_origin (40, 80, 1);
@@ -341,6 +344,8 @@ int GameEngine::loop (void) {
 						p1.send_move_right ();
 					} else if (key == player_1_keys[4]) {
 						p1.send_down ();
+					} else if (key == player_1_keys[5]) {
+						p1.send_rotate ();
 					}
 					
 					if (players == 2) {

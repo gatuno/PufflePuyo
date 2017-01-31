@@ -42,7 +42,8 @@ enum {
 	MAP_ANIMATE_NONE = 0,
 	MAP_ANIMATE_FALLING,
 	MAP_ANIMATE_GAMEOVER,
-	MAP_ANIMATE_SHOW_GAMEOVER
+	MAP_ANIMATE_SHOW_GAMEOVER,
+	MAP_ANIMATE_ROTATING
 };
 
 /* To store all the bubbles falling */
@@ -72,9 +73,14 @@ class Map {
 		int animating;
 		Message msgs;
 		
+		int grados;
+		
+		SDL_Surface *for_rotation;
+		
 		int chain;
 	/* Methods */
 		void check_islands (void);
+		void private_draw (SDL_Surface *, int, int, int, bool);
 	public:
 		Map (void);
 		
@@ -83,6 +89,7 @@ class Map {
 		void send_rotate_counter (void);
 		void send_move_left (void);
 		void send_move_right (void);
+		void send_rotate (void);
 		
 		void animate (void);
 		
